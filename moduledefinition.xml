@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="http://www.webhare.net/xmlns/system/moduledefinition">
+
+  <meta>
+    <version>1.0</version>
+    <description>Helper APIs for Webwerf sites</description>
+    <author>Webwerf</author>
+    <packaging download="true" />
+  </meta>
+
+</module>
+

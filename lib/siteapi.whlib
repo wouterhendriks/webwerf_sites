@@ -1,0 +1,201 @@
+<?wh
+LOADLIB "module::system/cache.whlib";
+LOADLIB "module::system/database.whlib";
+LOADLIB "module::system/whfs.whlib";
+
+OBJECT _siteapi;
+OBJECT _sitemenuapi;
+
+PUBLIC OBJECTTYPE SiteAPI
+< // ---------------------------------------------------------------------------
+  //
+  // Variables
+  //
+  OBJECT webdesign;
+
+  PUBLIC PROPERTY ishome(IsHomePage, -);
+
+  // ---------------------------------------------------------------------------
+  //
+  // Constructor
+  //
+  MACRO NEW(OBJECT webdesign)
+  {
+    this->webdesign := webdesign;
+  }
+
+  // ---------------------------------------------------------------------------
+  //
+  // Public API
+  //
+  PUBLIC STRING FUNCTION GetImageCSS(RECORD image, RECORD imagesettings, BOOLEAN objectfit DEFAULTSTO FALSE)
+  {
+    IF (NOT RecordExists(image))
+      RETURN "";
+
+    RECORD wrapped := WrapCachedImage(image, imagesettings);
+
+    STRING pos := wrapped.refpoint_backgroundposition ?? 'center';
+
+    IF (objectfit)
+      RETURN `object-fit: cover; object-position: ${pos}`;
+
+    RETURN `background-size: cover;
+            background-image: url(${wrapped.link});
+            background-position: ${pos};
+            background-color: ${wrapped.dominantcolor}`;
+  }
+
+  // ---------------------------------------------------------------------------
+  //
+  // Private functions
+  //
+  BOOLEAN FUNCTION IsHomePage()
+  {
+    RETURN this->webdesign->targetobject->id = this->webdesign->targetsite->rootobject->indexdoc;
+  }
+>;
+
+/**
+  Site menu API
+
+  Witty:
+
+  [component menu]
+    <ul class="menu__list">
+      [forevery menuitems]
+        <li class="menu__listitem [if menuitems]menu__listitem--has-sub-items[/if] [if selected]menu__listitem--selected[/if]">
+          <a href="[link]" class="menu__link [if selected]menu__link--selected[/if]">
+           [title]
+          </a>
+          [if menuitems]
+            [embed menu]
+          [/if]
+        </li>
+      [/forevery]
+    </ul>
+  [/component]
+
+  Library (assuming main whlib's GetPageConfig()):
+
+  OBJECT menuapi := GetSiteMenuAPI(this);
+  // ... settings ...
+  RETURN [ menuitems := menuapi->Generate() ];
+*/
+OBJECTTYPE SiteMenuAPI
+<
+  OBJECT webdesign;
+  INTEGER ARRAY fulltree;
+  INTEGER ARRAY skiptypeids;
+
+  PUBLIC INTEGER max_depth; // maximum folder depth, default 3
+  PUBLIC STRING ARRAY skiptypes; // string array of contenttype namespaces to skip (both folders and files)
+  PUBLIC BOOLEAN skipindexdocuments; // whether to skip index files in sub menus, default TRUE
+  PUBLIC BOOLEAN skiprootfiles; // whether to skip root files (files with the site root as parent), default TRUE
+  PUBLIC BOOLEAN addhome; // if TRUE, adds 'Home' as the first item in the first level (uses the root index file!), default FALSE
+
+  PUBLIC RECORD ARRAY flat_items_list; // holds a flat list of all menu items
+
+  MACRO NEW(OBJECT webdesign)
+  {
+    this->webdesign := webdesign;
+    this->max_depth := 3;
+    this->skipindexdocuments := TRUE;
+    this->skiprootfiles := TRUE;
+  }
+
+  PUBLIC RECORD ARRAY FUNCTION Generate()
+  {
+    IF (Length(this->skiptypes) > 0)
+    {
+      IF (Length(this->skiptypeids) = 0) // only retrieve WHFS types once
+      {
+        FOREVERY (STRING type FROM this->skiptypes)
+        {
+          OBJECT whfstype := OpenWHFSType(type);
+          IF (ObjectExists(whfstype))
+            INSERT whfstype->id INTO this->skiptypeids AT END;
+        }
+      }
+    }
+
+    this->fulltree := this->webdesign->targetobject->GetFullTree();
+
+    RETURN this->GetRecursiveMenu(this->webdesign->targetsite->root, 0);
+  }
+
+  BOOLEAN FUNCTION IsIndexFile(INTEGER fsid, BOOLEAN isfolder, INTEGER parentfolder_indexdoc)
+  {
+    RETURN NOT isfolder AND parentfolder_indexdoc = fsid;
+  }
+
+  RECORD ARRAY FUNCTION GetRecursiveMenu(INTEGER getparent, INTEGER depth)
+  {
+    IF (depth >= this->max_depth) //done
+      RETURN DEFAULT RECORD ARRAY;
+
+    OBJECT parentfolder := OpenWHFSObject(getparent);
+
+    RECORD ARRAY items :=
+        SELECT id
+             , name
+             , title
+             , isfolder
+             , modificationdate
+             , link := indexurl
+             , depth := VAR depth
+             , selected := id IN this->fulltree
+             , menuitems := isfolder ? this->GetRecursiveMenu(id, depth + 1) : DEFAULT RECORD ARRAY
+          FROM system.fs_objects AS fsobj
+         WHERE parent = getparent
+               AND title != ""
+               AND (NOT this->skiprootfiles ? TRUE : depth = 0 ? isfolder : TRUE)
+               AND (depth > 0 AND this->skipindexdocuments AND this->IsIndexFile(fsobj.id, fsobj.isfolder, parentfolder->indexdoc) ? FALSE : TRUE)
+               AND (isfolder ? type != 2 /* skip system folders */ : indexurl != "")
+               AND (Length(this->skiptypeids) > 0 ? type NOT IN this->skiptypeids : TRUE)
+      ORDER BY ordering, ToUppercase(title), id;
+
+    IF (depth = 0 AND this->addhome)
+    {
+      OBJECT homepage := OpenWHFSObject(this->webdesign->targetsite->rootobject->indexdoc);
+      IF (ObjectExists(homepage))
+      {
+        INSERT [ id := this->webdesign->targetsite->rootobject->indexdoc
+               , name := homepage->name
+               , title := homepage->title ?? "Home"
+               , isfolder := FALSE
+               , modificationdate := homepage->modificationdate
+               , link := homepage->indexurl
+               , depth := 0
+               , isselected := homepage->id IN this->fulltree
+               , menuitems := DEFAULT RECORD ARRAY
+               ] INTO items AT 0;
+      }
+    }
+
+    items :=
+        SELECT *
+             , multiple_subitems := Length(menuitems) > 1
+          FROM items;
+
+    this->flat_items_list := this->flat_items_list CONCAT items;
+
+    RETURN items;
+  }
+>;
+
+PUBLIC OBJECT FUNCTION GetSiteAPI(OBJECT webdesign)
+{
+  IF (NOT ObjectExists(_siteapi))
+    _siteapi := NEW SiteAPI(webdesign);
+
+  RETURN _siteapi;
+}
+
+PUBLIC OBJECT FUNCTION GetSiteMenuAPI(OBJECT webdesign)
+{
+  IF (NOT ObjectExists(_sitemenuapi))
+    _sitemenuapi := NEW SiteMenuAPI(webdesign);
+
+  RETURN _sitemenuapi;
+}
