@@ -167,7 +167,7 @@ OBJECTTYPE SiteMenuAPI
                , modificationdate := homepage->modificationdate
                , link := homepage->indexurl
                , depth := 0
-               , isselected := homepage->id IN this->fulltree
+               , selected := homepage->id IN this->fulltree
                , menuitems := DEFAULT RECORD ARRAY
                ] INTO items AT 0;
       }
