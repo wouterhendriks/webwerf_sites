@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
+             >
+
+  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/fullwidthimage"
+              editscreen=".fullwidthimage"
+              renderlibrary="fullwidthimage.whlib"
+              renderobjectname="fullwidthimage"
+              wittycomponent="fullwidthimage.witty:embeddedobject"
+              title="Afbeelding over hele breedte"
+              >
+    <members>
+      <member name="image" type="file" />
+    </members>
+  </widgettype>
+
+  <screen name="fullwidthimage"
+          xmlns="http://www.webhare.net/xmlns/tollium/screens"
+          implementation="p:widgetedit"
+          title="Bewerk afbeelding"
+          >
+    <compositions>
+      <record name="contentdata" />
+    </compositions>
+    <body>
+      <imgedit composition="contentdata"
+               cellname="image"
+               title=""
+               width="800px"
+               height="400px"
+               errorlabel="Afbeelding"
+               required="true"
+               allowedactions="all refpoint"
+               publisher="false"
+               />
+    </body>
+    <footer>
+      <defaultformbuttons buttons="ok cancel" />
+    </footer>
+  </screen>
+
+</siteprofile>

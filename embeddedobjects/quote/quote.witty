@@ -1,0 +1,23 @@
+[component embeddedobject]
+  <div class="quote">
+    <div class="embeddedobject embeddedobject--quote embeddedobject--[if isrtdpreview]preview[else]site[/if]">
+      [if isrtdpreview]
+        <div class="embeddedobject__type">Quote</div>
+        <p>"[quote_text]"</p>
+        <p><b>[quote_from_name]</b>[if quote_from_position], [quote_from_position][/if]</p>
+      [else]
+        <div class="emb-quote">
+          <div class="emb-quote__contents">
+            <div class="emb-quote__text">[quote_text]</div>
+            <div class="emb-quote__from">
+              <span class="emb-quote__from-name">[quote_from_name]</span>
+              [if quote_from_position]
+                <span class="emb-quote__from-position">[quote_from_position]</span>
+              [/if]
+            </div>
+          </div>
+        </div>
+      [/if]
+    </div>
+  </div>
+[/component]

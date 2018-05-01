@@ -1,0 +1,16 @@
+<?wh
+
+LOADLIB "mod::publisher/lib/widgets.whlib";
+
+LOADLIB "mod::system/lib/cache.whlib";
+
+PUBLIC OBJECTTYPE FullWidthImage EXTEND WidgetBase
+<
+  UPDATE PUBLIC MACRO Render()
+  {
+    RECORD data := [ image := WrapCachedImage(this->data.image, [ method := "fit", setwidth := 1920 ])
+                   ];
+
+    this->EmbedComponent(data);
+  }
+>;

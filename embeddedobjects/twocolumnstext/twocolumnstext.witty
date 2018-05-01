@@ -1,0 +1,28 @@
+[component embeddedobject]
+  <div class="embeddedobject embeddedobject--twocolumnstext embeddedobject--[if isrtdpreview]preview[else]site[/if]">
+    [if isrtdpreview]
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="50%" align="left" valign="top" style="padding-right: 30px">[rtd_left]</td>
+          <td width="50%" align="left" valign="top">[rtd_right]</td>
+        </tr>
+      </table>
+      <div class="embeddedobject__type">Twee-koloms-tekst</div>
+    [else]
+      <div class="emb-twocolumnstext">
+        <div class="emb-twocolumnstext__cols">
+          <div class="emb-twocolumnstext__col emb-twocolumnstext__col--left">
+            <div class="wh-rtd">
+              [rtd_left]
+            </div>
+          </div>
+          <div class="emb-twocolumnstext__col emb-twocolumnstext__col--right">
+            <div class="wh-rtd">
+              [rtd_right]
+            </div>
+          </div>
+        </div>
+      </div>
+    [/if]
+  </div>
+[/component]

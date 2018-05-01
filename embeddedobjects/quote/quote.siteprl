@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
+             >
+
+  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/quote"
+              editscreen=".quote"
+              renderlibrary="quote.whlib"
+              renderobjectname="quote"
+              wittycomponent="quote.witty:embeddedobject"
+              title="Quote"
+              >
+    <members>
+      <member name="quote_text" type="string" />
+      <member name="quote_from_name" type="string" />
+      <member name="quote_from_position" type="string" />
+    </members>
+  </widgettype>
+
+  <screen name="quote"
+          xmlns="http://www.webhare.net/xmlns/tollium/screens"
+          implementation="p:widgetedit"
+          title="Bewerk quote"
+          minwidth="600px"
+          >
+    <compositions>
+      <record name="contentdata" />
+    </compositions>
+    <body>
+      <heading title="Instellingen" />
+      <textarea composition="contentdata" cellname="quote_text" title="Quote-tekst" width="1pr" height="4x" required="true" />
+      <textedit composition="contentdata" cellname="quote_from_name" title="Quote van (naam)" width="1pr" required="true" />
+      <textedit composition="contentdata" cellname="quote_from_position" title="Quote van (functie)" width="1pr" />
+    </body>
+    <footer>
+      <defaultformbuttons buttons="ok cancel" />
+    </footer>
+  </screen>
+
+</siteprofile>

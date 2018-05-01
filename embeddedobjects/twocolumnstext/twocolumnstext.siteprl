@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
+             >
+
+  <rtdtype namespace="http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext">
+    <blockstyles defaultstyle="NORMAL">
+      <textstyle tag="HEADING1" containertag="h1" textstyles="" />
+      <textstyle tag="HEADING2" containertag="h2" textstyles="" />
+      <textstyle tag="HEADING3" containertag="h3" textstyles="" />
+      <textstyle tag="NORMAL" textstyles="b i a-href img sup sub strike" />
+      <textstyle tag="UNORDERED" containertag="ul" textstyles="b i a-href sup sub strike" />
+      <textstyle tag="ORDERED" containertag="ol" textstyles="b i a-href sup sub strike" />
+      <tablestyle tag="TABLE" />
+    </blockstyles>
+    <widgets>
+      <allowtype type="http://www.webhare.net/xmlns/publisher/embedvideo" />
+      <allowtype type="http://sites.webwerf.nl/embeddedobjects/button" />
+    </widgets>
+  </rtdtype>
+
+  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/twocolumnstext"
+              editscreen=".twocolumnstext"
+              renderlibrary="twocolumnstext.whlib"
+              renderobjectname="twocolumnstext"
+              wittycomponent="twocolumnstext.witty:embeddedobject"
+              title="Twee-koloms-tekst"
+              >
+    <members>
+      <member name="rtd_left" type="richdocument" />
+      <member name="rtd_right" type="richdocument" />
+    </members>
+  </widgettype>
+
+  <screen name="twocolumnstext"
+          xmlns="http://www.webhare.net/xmlns/tollium/screens"
+          implementation="p:widgetedit"
+          minwidth="500px"
+          minheight="450px"
+          allowresize="true"
+          savestate="size"
+          title="Bewerk twee-koloms-tekst"
+          >
+    <compositions>
+      <record name="contentdata" />
+    </compositions>
+    <body spacers="none">
+      <tabs height="1pr">
+        <tab title="Tekst (links)">
+          <panel layout="left" height="1pr">
+            <richdocument composition="contentdata"
+                          cellname="rtd_left"
+                          height="1pr"
+                          errorlabel="Tekst (links)"
+                          rtdtype="http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext"
+                          />
+          </panel>
+        </tab>
+        <tab title="Tekst (rechts)">
+          <richdocument composition="contentdata"
+                        cellname="rtd_right"
+                        height="1pr"
+                        errorlabel="Tekst (rechts)"
+                        rtdtype="http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext"
+                        />
+        </tab>
+      </tabs>
+    </body>
+    <footer>
+      <defaultformbuttons buttons="ok cancel" />
+    </footer>
+  </screen>
+
+</siteprofile>

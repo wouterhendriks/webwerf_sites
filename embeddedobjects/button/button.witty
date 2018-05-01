@@ -1,0 +1,12 @@
+[component embeddedobject]
+  <div class="embeddedobject embeddedobject--button embeddedobject--[if isrtdpreview]preview[else]site[/if]">
+    [if isrtdpreview]
+      <p>[[[title]] &lt;[link]&gt;</p>
+      <div class="embeddedobject__type">Knop</div>
+    [else]
+      <div class="emb-button">
+        <a class="emb-button__link button" href="[link]">[title]</a>
+      </div>
+    [/if]
+  </div>
+[/component]

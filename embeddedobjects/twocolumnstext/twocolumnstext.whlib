@@ -1,0 +1,25 @@
+<?wh
+LOADLIB "module::publisher/widgets.whlib";
+
+PUBLIC OBJECTTYPE TwoColumnsText EXTEND WidgetBase
+<
+  MACRO PTR rtd_left;
+  MACRO PTR rtd_right;
+
+  MACRO NEW()
+  {
+    this->rtd_left := PTR this->OpenRTD(this->data.rtd_left, "http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext")->RenderAllObjects();
+    this->rtd_right := PTR this->OpenRTD(this->data.rtd_right, "http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext")->RenderAllObjects();
+  }
+
+  UPDATE PUBLIC MACRO Render()
+  {
+    RECORD data :=
+        [ ...this->data
+        , rtd_left := this->rtd_left
+        , rtd_right := this->rtd_right
+        ];
+
+    this->EmbedComponent(data);
+  }
+>;

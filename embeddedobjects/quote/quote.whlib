@@ -1,0 +1,11 @@
+<?wh
+
+LOADLIB "mod::publisher/lib/widgets.whlib";
+
+PUBLIC OBJECTTYPE Quote EXTEND WidgetBase
+<
+  UPDATE PUBLIC MACRO Render()
+  {
+    this->EmbedComponent(this->data);
+  }
+>;

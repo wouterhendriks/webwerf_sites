@@ -1,0 +1,16 @@
+<?wh
+
+LOADLIB "mod::publisher/lib/publisher.whlib";
+LOADLIB "mod::publisher/lib/widgets.whlib";
+
+PUBLIC OBJECTTYPE Button EXTEND WidgetBase
+<
+  UPDATE PUBLIC MACRO Render()
+  {
+    RECORD data := [ ...this->data
+                   , link := GetInTextLinkTarget(this->data.link)
+                   ];
+
+    this->EmbedComponent(data);
+  }
+>;

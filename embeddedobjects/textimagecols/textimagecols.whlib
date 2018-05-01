@@ -1,0 +1,26 @@
+<?wh
+
+LOADLIB "mod::publisher/lib/widgets.whlib";
+
+LOADLIB "mod::system/lib/cache.whlib";
+
+
+PUBLIC OBJECTTYPE TextImageCols EXTEND WidgetBase
+<
+  UPDATE PUBLIC MACRO Render()
+  {
+    RECORD data := GetTextImageColsWittyData(this->context, this->data);
+
+    this->EmbedComponent(data);
+  }
+>;
+
+RECORD FUNCTION GetTextImageColsWittyData(OBJECT context, RECORD data)
+{
+  RETURN [ ...data
+         , image := context->IsRTDPreview() ? DEFAULT RECORD : WrapCachedImage(data.image, [ method := "fit", setwidth := 1920, format := "image/jpeg" ])
+         , image_lowres := context->IsRTDPreview() ? DEFAULT RECORD : WrapCachedImage(data.image, [ method := "fit", setwidth := 50, format := "image/jpeg" ])
+         , image_preview := WrapCachedImage(data.image, [ method := "fit", setheight := 100 ])
+         , richtext := PTR context->OpenRTD(data.richtext, "http://sites.webwerf.nl/embeddedobjects/rtd/textimagecols")->RenderAllObjects()
+         ];
+}

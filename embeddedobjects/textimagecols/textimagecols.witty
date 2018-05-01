@@ -1,0 +1,21 @@
+[component embeddedobject]
+  <div class="embeddedobject embeddedobject--textimagecols embeddedobject--[if isrtdpreview]preview[else]site[/if]">
+    [if isrtdpreview]
+      [richtext]
+      <div class="embeddedobject__type">Tekst en afbeelding</div>
+    [else]
+      <div class="emb-textimagecols">
+        <div class="emb-textimagecols__cols [if mirror]emb-textimagecols__cols--mirrored[/if]">
+          <div class="emb-textimagecols__col emb-textimagecols__col--text">
+            <div class="emb-textimagecols__text">
+              [richtext]
+            </div>
+          </div>
+          <div class="emb-textimagecols__col emb-textimagecols__col--image">
+            <img class="emb-textimagecols__image b-lazy" src="[image_lowres.link]" data-src="[image.link]" />
+          </div>
+        </div>
+      </div>
+    [/if]
+  </div>
+[/component]

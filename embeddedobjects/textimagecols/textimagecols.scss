@@ -1,0 +1,90 @@
+@mixin textimagecols() {
+  .emb-textimagecols {
+    &__cols {
+      display: flex;
+      justify-content: space-between;
+
+      &--mirrored {
+        .emb-textimagecols__col--image {
+          order: 1;
+        }
+
+        .emb-textimagecols__col--text {
+          order: 2;
+        }
+      }
+    }
+
+    &__col {
+      &--image {
+        width: 50%;
+      }
+
+      &--text {
+        display: flex;
+        align-self: center;
+        width: 50%;
+      }
+    }
+
+    &__image {
+      display: block;
+      width: 100%;
+    }
+
+    &__text {
+      > *:first-child {
+        margin-top: 0;
+      }
+
+      > *:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      &__title {
+        margin-top: 0;
+        padding-right: 0;
+      }
+
+      &__cols {
+        flex-direction: column;
+
+        &,
+        &--mirrored {
+          .emb-textimagecols__title,
+          .emb-textimagecols__text {
+            padding-left: 0;
+            padding-right: 0;
+          }
+        }
+
+        &--mirrored {
+          .emb-textimagecols__col--text {
+            margin-top: 25px;
+            padding-left: 0;
+            padding-right: 0;
+          }
+
+          .emb-textimagecols__col--image {
+            margin-top: 0;
+          }
+        }
+      }
+
+      &__col {
+        width: 100%;
+
+        &--text {
+          padding-left: 0;
+          padding-right: 0;
+        }
+
+        &--image {
+          margin-top: 25px;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+@mixin twocolumnstext($in-between-margin) {
+  .emb-twocolumnstext {
+    &__cols {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    &__col {
+      width: 50%;
+
+      &--left {
+        margin-right: #{$in-between-margin / 2};
+      }
+
+      &--right {
+        margin-left: #{$in-between-margin / 2};
+      }
+
+      .wh-rtd > *:first-child {
+        margin-top: 0;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      &__cols {
+        flex-direction: column;
+      }
+
+      &__col {
+        width: 100%;
+      }
+    }
+  }
+}
