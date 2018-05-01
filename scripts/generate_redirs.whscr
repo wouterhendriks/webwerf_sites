@@ -1,0 +1,28 @@
+<?wh
+
+LOADLIB "wh::files.whlib";
+LOADLIB "wh::os.whlib";
+LOADLIB "wh::ooxml/spreadsheet.whlib";
+
+LOADLIB "mod::system/lib/database.whlib";
+
+LOADLIB "mod::wrd/lib/api.whlib";
+
+BLOB data := GetDiskResource("/tmp/hoogers_301.xlsx");
+STRING deststart := "https://www.hoogers.nl/";
+
+OBJECT file := OpenOOXMLSpreadSheetFile(data);
+
+OBJECT sheet := file->OpenSheet(0);
+OpenPrimary();
+
+/* convert excel to:
+    , [ src := "banners/go/7f39f8317fbdb1988ef4c628eba02591", dest := "https://www.coopertire.co.uk/" ]
+*/
+
+RECORD ARRAY rows := GetOOXMLSpreadsheetRows(data);
+FOREVERY (RECORD row FROM rows)
+{
+  Print(`    , [ src := "${row.src}", dest := "${deststart}${row.dest}" ]
+`);
+}
