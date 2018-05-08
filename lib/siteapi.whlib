@@ -151,7 +151,8 @@ OBJECTTYPE SiteMenuAPI
                AND title != ""
                AND (NOT this->skiprootfiles ? TRUE : depth = 0 ? isfolder : TRUE)
                AND (depth > 0 AND this->skipindexdocuments AND this->IsIndexFile(fsobj.id, fsobj.isfolder, parentfolder->indexdoc) ? FALSE : TRUE)
-               AND (isfolder ? type != 2 /* skip system folders */ : indexurl != "")
+               AND type != 2 /* skip system folders */
+               AND indexurl != ""
                AND (Length(this->skiptypeids) > 0 ? type NOT IN this->skiptypeids : TRUE)
       ORDER BY ordering, ToUppercase(title), id;
 

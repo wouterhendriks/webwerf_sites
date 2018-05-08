@@ -8,8 +8,19 @@ LOADLIB "mod::system/lib/database.whlib";
 
 LOADLIB "mod::wrd/lib/api.whlib";
 
-BLOB data := GetDiskResource("/tmp/hoogers_301.xlsx");
-STRING deststart := "https://www.hoogers.nl/";
+RECORD args := ParseArguments(GetConsoleArguments(), [[ name := "path", type := "param" ],[ name := "desturl", type := "param" ]]);
+
+IF (NOT RecordExists(args)
+    OR args.path = ""
+    OR args.desturl = "")
+{
+  TerminateScriptWithError(`
+Usage: generate_redirs path-to-file dest-url
+`);
+}
+
+BLOB data := GetDiskResource(args.path);
+STRING deststart := args.desturl; // "https://www.hoogers.nl/";
 
 OBJECT file := OpenOOXMLSpreadSheetFile(data);
 
