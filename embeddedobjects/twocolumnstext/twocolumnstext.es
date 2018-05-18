@@ -1,1 +1,1 @@
-@import './twocolumnstext';
+import './twocolumnstext.scss';

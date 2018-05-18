@@ -32,8 +32,14 @@ OpenPrimary();
 */
 
 RECORD ARRAY rows := GetOOXMLSpreadsheetRows(data);
+
+rows := SELECT * FROM rows ORDER BY ToUpperCase(src), ToUpperCase(dest);
+
 FOREVERY (RECORD row FROM rows)
 {
+  IF (Left(row.src, 1) = "/")
+    row.src := Substring(row.src, 1);
+
   Print(`    , [ src := "${row.src}", dest := "${deststart}${row.dest}" ]
 `);
 }
