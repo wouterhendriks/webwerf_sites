@@ -78,3 +78,89 @@ CSS:
 ```
 @import '~@mod-webwerf_sites/embeddedobjects/twocolumnstext/twocolumnstext';
 ```
+
+# Cookie bar
+
+## Example JavaScript (ES)
+
+In this example, we're using a fixed header and want to set the height of the container on init.
+
+
+```
+import * as dompack from 'dompack';
+import * as cookieBar from '@mod-webwerf_sites/components/cookiebar';
+
+dompack.onDomReady(() => {
+  cookieBar.init({ onInit: onCookieBarInit });
+});
+
+function onCookieBarInit(showing = false) {
+  if (!showing)
+    return;
+
+  window.addEventListener('resize', onResizeWithCookieBar);
+  onResizeWithCookieBar();
+}
+
+function onResizeWithCookieBar() {
+  let cookieBar = dompack.qS('.ww-cookiebar');
+
+  if (cookieBar.classList.contains('show')) {
+    let height = dompack.qS('.ww-cookiebar__container').getBoundingClientRect().height;
+    cookieBar.style.height = `${height}px`;
+  }
+}
+```
+
+## Siteprofile
+
+```
+  <applysiteprofile fullpath="mod::webwerf_sites/components/cookiebar/cookiebar.siteprl" />
+```
+
+## WHLIB
+
+In the main pageconfig:
+
+```
+LOADLIB "mod::webwerf_sites/components/cookiebar/cookiebar.whlib";
+
+PUBLIC OBJECTTYPE ... EXTEND WebDesignBase
+<
+  UPDATE PUBLIC RECORD FUNCTION GetPageConfig()
+  {
+    ...
+
+    PrepareWebwerfCookieBar(this);
+
+    RETURN [ ...
+           , cookiebar := PTR RunWebwerfCookieBar(this)
+           ];
+```
+
+Don't forget to add '[cookiebar]' to your main Witty file, probably at the top of the page.
+
+## SCSS
+
+For normal sites, the CSS should be fine for the most part. But if you have an absolute or fixed positioned header, the following can be used:
+
+```
+.ww-cookiebar {
+  background: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transition: height .5s;
+  z-index: 20000;
+
+  // initialize as a visible block with 0 height; height is set through JS
+  display: block !important;
+  overflow: hidden;
+  height: 0;
+
+  &.hide {
+    height: 0 !important;
+  }
+}
+```

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
+             >
+
+  <rtdtype namespace="http://sites.webwerf.nl/cookiebar/rtd" allownewwindowlinks="true">
+    <blockstyles defaultstyle="NORMAL">
+      <textstyle tag="HEADING1" containertag="h1" textstyles="" />
+      <textstyle tag="HEADING2" containertag="h2" textstyles="" />
+      <textstyle tag="HEADING3" containertag="h3" textstyles="" />
+      <textstyle tag="NORMAL" textstyles="b i a-href sup sub strike" />
+      <textstyle tag="UNORDERED" containertag="ul" textstyles="b i a-href sup sub strike" />
+      <textstyle tag="ORDERED" containertag="ol" textstyles="b i a-href sup sub strike" />
+      <tablestyle tag="TABLE" />
+    </blockstyles>
+  </rtdtype>
+
+  <contenttype namespace="http://sites.webwerf.nl/cookiebar">
+    <member name="text" type="richdocument" />
+    <member name="text_mobile" type="richdocument" />
+    <member name="cookiename" type="string" />
+    <member name="button_accept" type="string" />
+    <member name="button_decline" type="string" />
+  </contenttype>
+
+  <tabsextension name="sitesettings" xmlns="http://www.webhare.net/xmlns/tollium/screens">
+    <newtab title="Cookiebalk">
+      <heading title="Cookienaam" />
+      <panel layout="left">
+        <text valuetid="webwerf_sites:cookiebar.name_descr" wordwrap="true" />
+        <textedit composition="contentdata" cellname="cookiename" title="" errorlabel="Cookienaam" required="true" width="1pr" />
+      </panel>
+
+      <heading title="Knoppen" />
+      <text value="Overschrijf (optioneel) de titels van de knoppen" wordwrap="true" />
+      <panel>
+        <textedit composition="contentdata" cellname="button_accept" title="Accepteren" width="1pr" placeholder="Accepteren" />
+        <textedit composition="contentdata" cellname="button_decline" title="Afwijzen" width="1pr" placeholder="Afwijzen" />
+      </panel>
+
+      <heading title="Tekst in cookiebalk (desktop)" />
+      <richdocument composition="contentdata"
+                    cellname="text"
+                    height="1pr"
+                    errorlabel="Cookiebalk - Tekst (desktop)"
+                    rtdtype="http://sites.webwerf.nl/cookiebar/rtd"
+                    required="true"
+                    />
+
+      <heading title="Tekst in cookiebalk (mobiel)" />
+      <richdocument composition="contentdata"
+                    cellname="text_mobile"
+                    height="1pr"
+                    errorlabel="Cookiebalk - Tekst (mobiel)"
+                    rtdtype="http://sites.webwerf.nl/cookiebar/rtd"
+                    required="true"
+                    />
+    </newtab>
+  </tabsextension>
+
+  <apply>
+    <to type="folder" pathmask="/" />
+    <extendproperties extension=".sitesettings" contenttype="http://sites.webwerf.nl/cookiebar" />
+  </apply>
+
+</siteprofile>

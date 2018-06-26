@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<language xmlns="http://www.webhare.net/xmlns/tollium/screens" xml:lang="nl" xmlns:html="http://www.w3.org/1999/xhtml">
+  <textgroup gid="cookiebar">   <!-- cookiebar -->
+    <text tid="name_descr">Kies hieronder een cookienaam. Deze dient uniek te zijn per site. <br/><br/>Advies: gebruik geen spaties en hoofdletters, en begin de naam bijv. met 'cookiebar-'. <br/><br/>De waarde van de cookie kan leeg zijn (nog geen keuze gemaakt), 'accepted' of 'declined'.</text>
+  </textgroup>
+</language>

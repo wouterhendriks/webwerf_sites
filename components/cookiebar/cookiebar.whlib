@@ -1,0 +1,25 @@
+<?wh
+
+LOADLIB "wh::files.whlib";
+LOADLIB "wh::witty.whlib";
+
+PUBLIC MACRO PrepareWebwerfCookieBar(OBJECT webdesign)
+{
+  RECORD cookiesettings := webdesign->targetsite->rootobject->GetInstanceData("http://sites.webwerf.nl/cookiebar");
+
+  IF (NOT CellExists(webdesign->jssiteconfig, "wwcookiename"))
+    INSERT CELL wwcookiename := GetSafeFileName(cookiesettings.cookiename) INTO webdesign->jssiteconfig;
+}
+
+PUBLIC MACRO RunWebwerfCookieBar(OBJECT webdesign)
+{
+  RECORD cookiesettings := webdesign->targetsite->rootobject->GetInstanceData("http://sites.webwerf.nl/cookiebar");
+
+  RECORD wittydata :=
+      CELL[ ...cookiesettings
+          , text := PTR webdesign->OpenRTD(cookiesettings.text, "http://sites.webwerf.nl/cookiebar/rtd")->RenderAllObjects()
+          , text_mobile := PTR webdesign->OpenRTD(cookiesettings.text_mobile, "http://sites.webwerf.nl/cookiebar/rtd")->RenderAllObjects()
+          ];
+
+  LoadWittyLibrary(Resolve("cookiebar.witty"),"HTML-NI")->RunComponent("cookiebar", wittydata);
+}
