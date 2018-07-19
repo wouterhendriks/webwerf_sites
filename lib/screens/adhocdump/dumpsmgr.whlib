@@ -1,0 +1,165 @@
+<?wh
+LOADLIB "wh::datetime.whlib";
+LOADLIB "mod::webwerf_sites/lib/adhocdump.whlib";
+LOADLIB "mod::webwerf_sites/lib/database.whlib";
+LOADLIB "mod::tollium/lib/screenbase.whlib";
+
+PUBLIC OBJECTTYPE Main EXTEND TolliumScreenBase
+<
+  MACRO Init(RECORD data)
+  {
+    this->frame->flags.managedumps := this->tolliumuser->HasRightOn("webwerf_sites:adhocdump_fullaccess", 0);
+
+    this->RefreshDumps();
+
+    // hide add button if no rights
+    IF (NOT this->frame->flags.managedumps)
+    {
+      this->addbutton->visible := FALSE;
+      this->addmenuitem->visible := FALSE;
+    }
+
+    // if there's not any manageable dump, remove some options from the interface
+    IF (NOT RecordExists(SELECT FROM this->dumps->rows WHERE canmanage))
+    {
+      this->editbutton->visible := FALSE;
+      this->deletebutton->visible := FALSE;
+      this->editmenuitem->visible := FALSE;
+      this->resetmenuitem->visible := FALSE;
+      this->deletemenuitem->visible := FALSE;
+      this->deletebyidmenuitem->visible := FALSE;
+    }
+  }
+
+  MACRO RefreshDumps()
+  {
+    BOOLEAN manageall := this->frame->flags.managedumps;
+
+    this->dumps->rows := SELECT rowkey := id
+                              , canmanage := manageall OR this->tolliumuser->HasRightOn("webwerf_sites:adhocdump_fullaccess", id)
+                              , canedit := manageall OR this->tolliumuser->HasRightOn("webwerf_sites:adhocdump_editresults", id)
+                              , tag
+                              , title := title ?? tag
+                              , numresults
+                           FROM webwerf_sites.adhocdump_dumps
+                          WHERE manageall OR this->tolliumuser->HasRightOn("webwerf_sites:adhocdump_viewresults", id);
+  }
+
+  MACRO DoAdd()
+  {
+    OBJECT dumpscreen := this->LoadScreen(".dumpprops", [id := 0]);
+    dumpscreen->RunModal();
+    this->RefreshDumps();
+  }
+
+  MACRO DoEdit()
+  {
+    OBJECT dumpscreen := this->LoadScreen(".dumpprops", [id := this->dumps->value]);
+    dumpscreen->RunModal();
+    this->RefreshDumps();
+  }
+
+  MACRO DoDeleteById()
+  {
+    OBJECT dumpscreen := this->LoadScreen(".deletebyid", [id := this->dumps->value]);
+    dumpscreen->RunModal();
+    this->RefreshDumps();
+  }
+
+  MACRO Doreset()
+  {
+    IF(this->RunMessageBox(".verifyresetdump", this->dumps->selection.title) != "yes")
+      RETURN;
+
+    OBJECT work := this->BeginWork();
+    OBJECT dieingdump := OpenAdhocDumpById(this->dumps->value);
+    dieingdump->DeleteAllResults();
+    work->Finish();
+
+    this->RefreshDumps();
+  }
+
+  MACRO DoDelete()
+  {
+    IF(this->RunMessageBox(".verifydeletedump", this->dumps->selection.title) != "yes")
+      RETURN;
+
+    OBJECT work := this->BeginWork();
+    OBJECT dieingdump := OpenAdhocDumpById(this->dumps->value);
+    dieingdump->deleteSelf();
+    work->Finish();
+
+    this->RefreshDumps();
+  }
+
+  MACRO DoOpen()
+  {
+    OBJECT dumpscreen := this->LoadScreen("adhocdump/dump.overview", [id := this->dumps->value]);
+    dumpscreen->RunModal();
+    this->RefreshDumps();
+  }
+>;
+
+PUBLIC OBJECTTYPE DumpProps EXTEND TolliumScreenBase
+<
+  INTEGER id;
+
+  MACRO Init(RECORD data)
+  {
+    this->id := data.id;
+    IF(data.id != 0)
+    {
+      RECORD dumpinfo := SELECT * FROM webwerf_sites.adhocdump_dumps WHERe id=this->id;
+      this->tag->value := dumpinfo.tag;
+      this->title->value := dumpinfo.title;
+      this->description->value := dumpinfo.description;
+    }
+  }
+  BOOLEAN FUNCTION Submit()
+  {
+    OBJECT work := this->BeginWork();
+
+    //FIXME check unique tag
+    IF(NOT work->HasFailed())
+    {
+      IF(this->id = 0)
+      {
+        INSERT INTO webwerf_sites.adhocdump_dumps(tag, title, description, creationdate)
+               VALUES(ToUppercase(this->tag->value), this->title->value, this->description->value, GetCurrentDatetime());
+      }
+      ELSE
+      {
+        UPDATE webwerf_sites.adhocdump_dumps
+               SET tag := ToUppercase(this->tag->value)
+                 , title := this->title->value
+                 , description := this->description->value
+               WHERE id = this->id;
+      }
+    }
+
+    RETURN work->Finish();
+  }
+>;
+
+PUBLIC OBJECTTYPE DeleteById EXTEND TolliumScreenBase
+<
+  INTEGER dumpid;
+
+  MACRO Init(RECORD data)
+  {
+    this->dumpid := data.id;
+  }
+  BOOLEAN FUNCTION Submit()
+  {
+    OBJECT work := this->BeginWork();
+    OBJECT dump := OpenAdhocDumpById(this->dumpid);
+    RECORD tokill := dump->GetResult(this->resultid->value);
+    IF(NOT RecordExists(tokill))
+      work->AddErrorFor(this->resultid, GetTid("webwerf_sites:adhocdump.dumpsmgr.deletebyid.nosuchresult"));
+
+    IF(NOT work->HasFailed())
+      dump->DeleteResult(this->resultid->Value);
+
+    RETURN work->Finish();
+  }
+>;

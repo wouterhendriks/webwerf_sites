@@ -1,7 +1,10 @@
 <?wh
-LOADLIB "module::system/cache.whlib";
-LOADLIB "module::system/database.whlib";
-LOADLIB "module::system/whfs.whlib";
+LOADLIB "wh::datetime.whlib";
+LOADLIB "mod::publisher/lib/publisher.whlib";
+LOADLIB "mod::system/lib/cache.whlib";
+LOADLIB "mod::system/lib/configure.whlib";
+LOADLIB "mod::system/lib/database.whlib";
+LOADLIB "mod::system/lib/whfs.whlib";
 
 OBJECT _siteapi;
 OBJECT _sitemenuapi;
@@ -22,6 +25,9 @@ PUBLIC OBJECTTYPE SiteAPI
   MACRO NEW(OBJECT webdesign)
   {
     this->webdesign := webdesign;
+
+    IF (GetDTAPStage() != "production")
+      this->webdesign->assetcachebuster := ToString(GetUnixTimestamp(GetCurrentDateTime()));
   }
 
   // ---------------------------------------------------------------------------
@@ -44,6 +50,23 @@ PUBLIC OBJECTTYPE SiteAPI
             background-image: url(${wrapped.link});
             background-position: ${pos};
             background-color: ${wrapped.dominantcolor}`;
+  }
+
+  // the instance data referenced by ns_pagesettingstype should contain a 'seotitle' cell
+  PUBLIC RECORD ARRAY FUNCTION GetPath(STRING ns_pagesettingstype)
+  {
+    RECORD ARRAY path := __GenerateFilePath(this->webdesign->targetobject->id, "");
+
+    // optionally use the SEO 'Overwrite title' setting for the title
+    OBJECT pagesettingstype := OpenWHFSType(ns_pagesettingstype);
+    FOREVERY (RECORD pathitem FROM path)
+    {
+      RECORD filesettings := pagesettingstype->GetInstanceData(pathitem.id);
+      IF (RecordExists(filesettings) AND filesettings.seotitle != "")
+        path[#pathitem].title := filesettings.seotitle;
+    }
+
+    RETURN path;
   }
 
   // ---------------------------------------------------------------------------
@@ -90,6 +113,7 @@ OBJECTTYPE SiteMenuAPI
 
   PUBLIC INTEGER max_depth; // maximum folder depth, default 3
   PUBLIC STRING ARRAY skiptypes; // string array of contenttype namespaces to skip (both folders and files)
+  PUBLIC STRING ARRAY foldertypes_indexonly; // string array of folder types for which we only want to add the index file
   PUBLIC BOOLEAN skipindexdocuments; // whether to skip index files in sub menus, default TRUE
   PUBLIC BOOLEAN skiprootfiles; // whether to skip root files (files with the site root as parent), default TRUE
   PUBLIC BOOLEAN addhome; // if TRUE, adds 'Home' as the first item in the first level (uses the root index file!), default FALSE
@@ -136,6 +160,8 @@ OBJECTTYPE SiteMenuAPI
 
     OBJECT parentfolder := OpenWHFSObject(getparent);
 
+    BOOLEAN indexonly := parentfolder->typens IN this->foldertypes_indexonly;
+
     RECORD ARRAY items :=
         SELECT id
              , name
@@ -154,6 +180,7 @@ OBJECTTYPE SiteMenuAPI
                AND type != 2 /* skip system folders */
                AND indexurl != ""
                AND (Length(this->skiptypeids) > 0 ? type NOT IN this->skiptypeids : TRUE)
+               AND (indexonly ? isfolder AND this->IsIndexFile(fsobj.id, fsobj.isfolder, parentfolder->indexdoc) : TRUE)
       ORDER BY ordering, ToUppercase(title), id;
 
     IF (depth = 0 AND this->addhome)
@@ -199,4 +226,64 @@ PUBLIC OBJECT FUNCTION GetSiteMenuAPI(OBJECT webdesign)
     _sitemenuapi := NEW SiteMenuAPI(webdesign);
 
   RETURN _sitemenuapi;
+}
+
+// copied from `mod::publisher/lib/tools/navpaths.whlib`, added id
+RECORD ARRAY FUNCTION __GenerateFilePath(INTEGER tofile,STRING sitename)
+{
+  RECORD ARRAY returnlist;
+
+  //Gather the file properties first
+  RECORD filerec := SELECT (FILES.title="" ? FILES.name : FILES.title) AS title,
+                            FILES.NAME AS name,
+                            FILES.URL,
+                            FILES.ID,
+                            FILES.PARENT AS __parent,
+                            FOLDERS.INDEXDOC AS __indexdoc
+                     FROM system.fs_objects as files, system.fs_objects as folders
+                     WHERE FILES.ID=TOFILE
+                           AND FOLDERS.ID = FILES.PARENT
+                           AND files.isfolder = FALSE
+                           AND folders.isfolder = TRUE
+                     LIMIT 1;
+
+  IF (NOT RECORDEXISTS(filerec))
+    RETURN returnlist;
+
+  //first create a path _to_ the file.
+  returnlist := __GenerateFolderPath(filerec.__parent,sitename);
+
+  //Should the file be on the list?
+  IF (filerec.__indexdoc != tofile)
+  { //yes, then add it!
+    INSERT filerec INTO returnlist AT END;
+  }
+
+  //return the complete list, with our file added if necessary
+  RETURN returnlist;
+}
+
+// copied from `mod::publisher/lib/tools/navpaths.whlib`, added id
+RECORD ARRAY FUNCTION __GenerateFolderPath(INTEGER tofolder, STRING sitename)
+{
+  RECORD ARRAY returnlist;
+  STRING indexpagename;
+
+  INTEGER ARRAY foldertree := GetFolderTreeIDs(tofolder);
+  FOREVERY (INTEGER folderid FROM foldertree)
+  {
+    RECORD folderlink := SELECT (sitename != "" AND folderid=foldertree[0])
+                                   ? sitename //root must be overriden
+                                   : (title="" ? name : title)//no override
+                                   AS TITLE,
+                                 NAME,
+                                 ID,
+                                INDEXURL AS URL
+                         FROM system.fs_objects
+                         WHERE id=folderid
+                         LIMIT 1;
+
+    INSERT folderlink INTO returnlist AT END;
+  }
+  RETURN returnlist;
 }

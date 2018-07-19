@@ -1,6 +1,69 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <language xmlns="http://www.webhare.net/xmlns/tollium/screens" xml:lang="nl" xmlns:html="http://www.w3.org/1999/xhtml">
+  <textgroup gid="adhocdump">   <!-- adhocdump -->
+    <textgroup gid="dump">   <!-- adhocdump.dump -->
+      <textgroup gid="messages">   <!-- adhocdump.dump.messages -->
+        <text tid="verifydeleteresult">Verwijderde resultaten kunnen niet hersteld worden. Weet u zeker dat u dit resultaat wil verwijderen ?</text>
+      </textgroup>
+      <textgroup gid="overview">   <!-- adhocdump.dump.overview -->
+        <text tid="export">Exporteren</text>
+        <text tid="exporttype">Exporttype</text>
+        <text tid="exporttype-csv">Excel (.xlsx of .csv)</text>
+        <text tid="exporttype-zip">Archiefbestand met .csv-bestand en bijlagen</text>
+        <text tid="screentitle">Exporteren</text>
+      </textgroup>
+    </textgroup>
+    <textgroup gid="dumpsmgr">   <!-- adhocdump.dumpsmgr -->
+      <text tid="apptitle">Data-opslag (x)</text>
+      <textgroup gid="deletebyid">   <!-- adhocdump.dumpsmgr.deletebyid -->
+        <text tid="aboutdeletion">Een specifiek resultaat kan verwijderd worden door de waarde in de ID kolom (de kolom gemarkeerd als 'ID' in de export) op te geven.<br/><br/>Verwijderen is permanent en kan niet teruggedraaid worden, dus we raden u aan uw vorige export als reservekopie te bewaren.</text>
+        <text tid="nosuchresult">Geen resultaat met het opgegeven id gevonden</text>
+        <text tid="resultid">Resultaat id</text>
+        <text tid="screentitle">Resultaat op id verwijderen</text>
+      </textgroup>
+      <textgroup gid="dumpprops">   <!-- adhocdump.dumpsmgr.dumpprops -->
+        <text tid="accesstoken">Toegangstoken</text>
+        <text tid="description">Omschrijving</text>
+        <text tid="generate">Genereer token</text>
+        <text tid="screentitle">Data-opslag eigenschappen</text>
+        <text tid="tag">Tag</text>
+        <text tid="title">Naam</text>
+      </textgroup>
+      <textgroup gid="main">   <!-- adhocdump.dumpsmgr.main -->
+        <text tid="deletebyid">Verwijder een enkel resultaat</text>
+        <text tid="numresults">Resultaten</text>
+        <text tid="open">Open</text>
+        <text tid="reset">Reset dump</text>
+        <text tid="screentitle">Dumpbeheer</text>
+        <text tid="tag">Tag</text>
+        <text tid="title">Naam</text>
+      </textgroup>
+      <textgroup gid="messages">   <!-- adhocdump.dumpsmgr.messages -->
+        <text tid="verifydeletedump">Weet u zeker dat u deze dump permanent wil verwijderen?</text>
+        <text tid="verifyresetdump">Weet u zeker dat u alle resultaten in deze dump permanent wil verwijderen?</text>
+      </textgroup>
+    </textgroup>
+    <textgroup gid="rights">   <!-- adhocdump.rights -->
+      <text tid="dumps">Adhoc dumps</text>
+      <text tid="editresults">Wijzig resultaten</text>
+      <text tid="editresults-descr">Mag enkele resultaten wijzigen</text>
+      <text tid="fullaccess">Volledige toegang</text>
+      <text tid="fullaccess-descr">Volledige toegang tot dumps, inclusief de optie om ze leeg te gooien of te verwijderen</text>
+      <text tid="viewresults">Bekijk resultaten</text>
+      <text tid="viewresults-descr">Mag resultaten exporteren</text>
+    </textgroup>
+  </textgroup>
   <textgroup gid="cookiebar">   <!-- cookiebar -->
     <text tid="name_descr">Kies hieronder een cookienaam. Deze dient uniek te zijn per site. <br/><br/>Advies: gebruik geen spaties en hoofdletters, en begin de naam bijv. met 'cookiebar-'. <br/><br/>De waarde van de cookie kan leeg zijn (nog geen keuze gemaakt), 'accepted' of 'declined'.</text>
+  </textgroup>
+  <textgroup gid="rights">   <!-- rights -->
+    <text tid="accessrules">Toegangsregels</text>
+    <text tid="adhocdump_editresults">Wijzig resultaten</text>
+    <text tid="adhocdump_editresults-descr">Mag individuele resultaten wijzigen</text>
+    <text tid="adhocdump_fullaccess">Volledige toegang tot data-opslag</text>
+    <text tid="adhocdump_fullaccess-descr">Volledige toegang tot data-opslag dumps, inclusief de optie om ze leeg te gooien of te verwijderen</text>
+    <text tid="adhocdump_viewresults">Bekijk resultaten van data-opslag dumps</text>
+    <text tid="adhocdump_viewresults-descr">Mag data-opslag resultaten exporteren</text>
+    <text tid="adhocdumps">Data-opslag dumps</text>
   </textgroup>
 </language>

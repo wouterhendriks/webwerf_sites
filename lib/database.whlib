@@ -1,0 +1,43 @@
+﻿<?wh
+LOADLIB "mod::system/lib/database.whlib";
+
+PUBLIC SCHEMA
+< TABLE
+    < INTEGER "id"
+    , STRING "tag"
+    , DATETIME "creationdate"
+    , DATETIME "lastresultdate"
+    , STRING "title"
+    , STRING "description"
+    , INTEGER "numresults"
+    > "adhocdump_dumps"
+  , TABLE
+    < INTEGER "id"
+    , INTEGER "dump"
+    , STRING "tag"
+    , INTEGER "type"
+    > "adhocdump_fields"
+  , TABLE
+    < INTEGER "id"
+    , INTEGER "dump"
+    , DATETIME "creationdate"
+    , DATETIME "modificationdate"
+    , STRING "ip"
+    > "adhocdump_results"
+  , TABLE
+    < INTEGER "id"
+    , INTEGER "result"
+    , INTEGER "field"
+    , STRING "value"
+    , BLOB "blobvalue"
+    > "adhocdump_resultvalues"
+  > webwerf_sites;
+
+/** @short Bind the module tables
+    @param transactionid Transaction id to bind to */
+PUBLIC MACRO BindWebwerfSitesTables(INTEGER transactionid)
+{
+  webwerf_sites := BindTransactionToSchema(transactionid, "webwerf_sites");
+}
+
+SetupPrimaryTransactionBinder(PTR BindWebwerfSitesTables);

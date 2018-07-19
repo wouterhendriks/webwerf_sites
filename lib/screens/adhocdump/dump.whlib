@@ -1,0 +1,33 @@
+<?wh
+LOADLIB "wh::files.whlib";
+LOADLIB "mod::tollium/lib/screenbase.whlib";
+LOADLIB "mod::webwerf_sites/lib/adhocdump.whlib";
+
+
+PUBLIC OBJECTTYPE Overview EXTEND TolliumScreenBase
+<
+  INTEGER id;
+
+  MACRO Init(RECORD data)
+  {
+    this->id := data.id;
+    this->frame->flags.fullaccess := this->tolliumuser->HasRightOn("system:adhocdump_fullaccess", data.id);
+    this->frame->flags.editresults := this->tolliumuser->HasRightOn("system:adhocdump_editresults", data.id);
+  }
+
+  MACRO DoExport()
+  {
+    IF(this->exporttype->value="csv")
+    {
+      OBJECT dump := OpenAdhocDumpById(this->id);
+      OBJECT exportdialog := CreateAdhocDumpCSVExportDialog(this, dump);
+      exportdialog->RunDialog();
+    }
+    ELSE
+    {
+      OBJECT dump := OpenAdhocDumpById(this->id);
+      BLOB zip := dump->ExportAsZIP();
+      this->frame->sendFileToUser(zip, "application/zip", GetSafeFilename(dump->tag) || ".zip", DEFAULT DATETIME);
+    }
+  }
+>;

@@ -1,0 +1,513 @@
+<?wh
+LOADLIB "wh::datetime.whlib";
+LOADLIB "wh::files.whlib";
+LOADLIB "wh::float.whlib";
+LOADLIB "wh::filetypes/archiving.whlib";
+LOADLIB "wh::filetypes/csv.whlib";
+LOADLIB "wh::money.whlib";
+LOADLIB "mod::system/lib/database.whlib";
+LOADLIB "mod::system/lib/internal/rightsmgmt.whlib";
+LOADLIB "mod::system/lib/internal/typecoder.whlib";
+LOADLIB "mod::tollium/lib/commondialogs.whlib";
+LOADLIB "mod::webwerf_sites/lib/database.whlib";
+
+
+STRING FUNCTION MapType(INTEGER typecoderid)
+{
+  SWITCH(typecoderid)
+  {
+    CASE 2 { RETURN "text"; }
+    CASE 4 { RETURN "datetime"; }
+    CASE 6 { RETURN "boolean"; }
+    CASE 7 { RETURN "integer"; }
+    CASE 8 { RETURN "float"; }
+    CASE 9 { RETURN "money"; }
+    DEFAULT { RETURN "text"; }
+  }
+}
+RECORD FUNCTION DecodeResults(RECORD row, RECORD ARRAY cols, RECORD ARRAY relevantresults)
+{
+  FOREVERY(RECORD col FROM cols)
+  {
+    RECORD valrec := SELECT * FROM relevantresults WHERE field = col.id;
+    VARIANT storeval;
+
+    IF(RecordExists(valrec))
+      storeval := AnyTypeFromBlobString(valrec.value, valrec.blobvalue, col.type);
+    ELSE
+      storeval := AnyTypeFromBlobString("", DEFAULT BLOB, col.type);
+
+    IF(col.type=42)
+      storeval := EncodeJSON(storeval);
+
+    row := CellInsert(row, col.tag, storeval);
+  }
+  RETURN row;
+}
+
+STATIC OBJECTTYPE AdhocDump
+<
+  RECORD dumprec;
+
+  PUBLIC PROPERTY id(GetId, -);
+  PUBLIC PROPERTY tag(GetTag, -);
+
+  MACRO NEW(RECORD dumprec)
+  {
+    this->dumprec := dumprec;
+  }
+
+  INTEGER FUNCTION GetId()
+  {
+    RETURN this->dumprec.id;
+  }
+
+  STRING FUNCTION GetTag()
+  {
+    RETURN this->dumprec.tag;
+  }
+
+  PUBLIC INTEGER FUNCTION GetNumResults()
+  {
+    RETURN SELECT AS INTEGER numresults FROM webwerf_sites.adhocdump_dumps WHERE id = this->dumprec.id;
+  }
+
+  RECORD ARRAY FUNCTION GetDumpResults(INTEGER ARRAY limitids)
+  {
+    RECORD ARRAY cols := SELECT *
+                           FROM webwerf_sites.adhocdump_fields
+                          WHERE dump = this->dumprec.id
+                       ORDER BY id;
+
+    RECORD ARRAY rows;
+    RECORD ARRAY results := SELECT id, creationdate, modificationdate, ip
+                              FROM webwerf_sites.adhocdump_results
+                             WHERE dump = this->dumprec.id
+                                   AND (Length(limitids) = 0 ? TRUE : id IN limitids)
+                          ORDER BY creationdate;
+
+    RECORD ARRAY resultvals := SELECT adhocdump_resultvalues.*
+                                 FROM webwerf_sites.adhocdump_results, webwerf_sites.adhocdump_resultvalues
+                                WHERE adhocdump_results.dump = this->dumprec.id
+                                      AND adhocdump_resultvalues.result = adhocdump_results.id
+                                      AND (Length(limitids) = 0 ? TRUE : result IN limitids)
+                             ORDER BY result, field;
+
+    FOREVERY(RECORD result FROM results)
+    {
+      //ADDME use binary searches
+      RECORD row := [ dump_creationdate := result.creationdate
+                    , dump_modificationdate := result.modificationdate
+                    , dump_ip := result.ip
+                    , dump_id := result.id
+                    ];
+
+      RECORD ARRAY relevantresults := SELECT * FROM resultvals WHERE resultvals.result = VAR result.id;
+      row := DecodeResults(row, cols, relevantresults);
+      INSERT row INTO rows AT END;
+    }
+    RETURN rows;
+  }
+
+  PUBLIC RECORD FUNCTION GetResult(INTEGER resultid)
+  {
+    RETURN this->getdumpresults([resultid]);
+  }
+
+  PUBLIC RECORD ARRAY FUNCTION GetAllResults()
+  {
+    RETURN this->getdumpresults(DEFAULT INTEGER ARRAY);
+  }
+
+  PUBLIC MACRO DeleteResult(INTEGER resultid)
+  {
+    IF(NOT RecordExists(SELECT FROM webwerf_sites.adhocdump_results WHERE id=resultid))
+      THROW NEW Exception("No result with id " || resultid);
+
+    DELETE FROM webwerf_sites.adhocdump_results WHERE dump = this->dumprec.id AND id=resultid;
+    UPDATE webwerf_sites.adhocdump_dumps SET numresults := numresults - 1 WHERE id = this->dumprec.id;
+  }
+
+  PUBLIC MACRO DeleteAllResults()
+  {
+    DELETE FROM webwerf_sites.adhocdump_results WHERE dump = this->dumprec.id;
+    DELETE FROM webwerf_sites.adhocdump_fields WHERE dump = this->dumprec.id;
+    UPDATE webwerf_sites.adhocdump_dumps SET numresults := 0 WHERE id = this->dumprec.id;
+  }
+
+  PUBLIC MACRO DeleteSelf()
+  {
+    DELETE FROM webwerf_sites.adhocdump_dumps WHERE id = this->dumprec.id;
+    this->dumprec := DEFAULT RECORD;
+  }
+
+  PUBLIC BLOB FUNCTION ExportAsZIP()
+  {
+    //FIXME need tollium commondialogs.whlib to split off formatters into CSV.whlib so we don't have to poorly reinvent a wheel..
+
+    OBJECT zipout := CreateNewArchive("zip");
+    INTEGER outcsv := CreateStream();
+
+    RECORD ARRAY cols := [[ name := "Dump ID"
+                          , tag := "dump_id"
+                          ]
+                         ,[ name := "Dump creationdate"
+                          , tag := "dump_creationdate"
+                          ]
+                         ,[ name := "Dump IP"
+                          , tag := "dump_ip"
+                          ]
+                         ]
+                         CONCAT SELECT name:=tag, tag
+                           FROM webwerf_sites.adhocdump_fields
+                          WHERE dump = this->dumprec.id
+                       ORDER BY id;
+
+    FOREVERY(RECORD col FROM cols)
+      PrintTo(outcsv, (#col=0?'':';') || EncodeExcelCSV(col.name));
+    PrintTo(outcsv,"\r\n");
+
+    RECORD ARRAY allresults := this->GetAllResults();
+    STRING basepath := GetSafeFilename(this->dumprec.tag) || "/";
+    FOREVERY(RECORD result FROM allresults)
+    {
+      FOREVERY(RECORD col FROM cols)
+      {
+        IF(#col>0)
+          PrintTo(outcsv,";");
+
+        VARIANT data := GetCell(result,col.tag);
+        SWITCH(TYPEID(data))
+        {
+          CASE TypeID(STRING)
+          {
+            PrintTo(outcsv, EncodeExcelCSV(data));
+          }
+          CASE TypeID(INTEGER)
+          {
+            PrintTo(outcsv, ToString(data));
+          }
+          CASE TypeID(DATETIME)
+          {
+            PrintTo(outcsv, FormatDateTime("%d-%m-%Y %#H:%M", data, "en"));
+          }
+          CASE TypeID(BOOLEAN)
+          {
+            PrintTo(outcsv, data?'1':'0');
+          }
+          CASE TypeID(BLOB)
+          {
+            IF(Length(data)!=0)
+            {
+              RECORD info := WrapBlob(data,"");
+              STRING outfilename := ToLowercase(col.tag) || "-" || result.dump_id || GetExtensionForMimetype(info.mimetype);
+              zipout->AddFile(basepath || outfilename, data, result.dump_modificationdate);
+              PrintTo(outcsv, EncodeExcelCSV(outfilename));
+            }
+          }
+          CASE TypeID(MONEY)
+          {
+            PrintTo(outcsv, FormatMoney(data,0,".","",FALSE));
+          }
+          CASE TypeID(FLOAT)
+          {
+            PrintTo(outcsv, FormatFloat(data,12));
+          }
+          DEFAULT
+          {
+            THROW NEW Exception("Unexpected type " || GetTYpeName(typeid(data)));
+          }
+        }
+      }
+      PrintTo(outcsv, "\r\n");
+    }
+    zipout->AddFile(basepath || "/export.csv", MakeBlobFromStream(outcsv), GetCurrentDatetime());
+    BLOB result := zipout->MakeBlob();
+    zipout->Close();
+    RETURN result;
+  }
+
+  PUBLIC RECORD FUNCTION GetDump(INTEGER resultid)
+  {
+    RECORD ARRAY currentfields := SELECT id, tag, type
+                                    FROM webwerf_sites.adhocdump_fields
+                                   WHERE adhocdump_fields.dump = this->id;
+    RECORD result := SELECT * FROM webwerf_sites.adhocdump_results WHERE adhocdump_results.id = resultid;
+    IF(NOT RecordExists(result))
+      RETURN DEFAULT RECORD;
+
+    RECORD row := [ dump_creationdate := result.creationdate
+                  , dump_modificationdate := result.modificationdate
+                  , dump_ip := result.ip
+                  ];
+
+    RECORD ARRAY results := SELECT * FROM webwerf_sites.adhocdump_resultvalues WHERE adhocdump_resultvalues.result = resultid;
+    row := DecodeResults(row, currentfields, results);
+    RETURN row;
+  }
+
+  PUBLIC BOOLEAN FUNCTION UpdateDump(INTEGER resultid, RECORD newdata)
+  {
+    // Never update the following fields:
+    DELETE CELL "dump_creationdate" FROM newdata;
+    DELETE CELL "dump_modificationdate" FROM newdata;
+    DELETE CELL "dump_ip" FROM newdata;
+
+    RECORD result := SELECT * FROM webwerf_sites.adhocdump_results WHERE adhocdump_results.dump = this->id AND adhocdump_results.id = resultid;
+    IF(NOT RecordExists(result))
+      RETURN FALSE;
+
+    DATETIME now := GetCurrentDatetime();
+    IF(now = result.modificationdate)
+      now := AddTimeToDate(1,now); //increase my smallest unit possible to ensure a creationdate!=modificationdate test is valid
+
+    this->DoStoreDump(resultid, newdata, FALSE);
+    UPDATE webwerf_sites.adhocdump_results SET modificationdate := now
+                                     WHERE id = resultid;
+
+    UPDATE webwerf_sites.adhocdump_dumps SET lastresultdate := now
+                                   WHERE id = this->id;
+
+    /* ADDME reconstruction and reload should happen under a mutex for safety (so no two threads try to create fields at
+       the same time) but for that we need to recommend a lock to our caller, or we need to accept unique constraint
+       violations and fix 'm up later */
+    RETURN TRUE;
+  }
+
+  PUBLIC INTEGER FUNCTION DirectDump(STRING ip, RECORD todump)
+  {
+    INTEGER resultid := MakeAutonumber(webwerf_sites.adhocdump_results,"id");
+    DATETIME now := GetCurrentDatetime();
+    INSERT INTO webwerf_sites.adhocdump_results(id, dump, creationdate, modificationdate, ip)
+           VALUES(resultid, this->id, now, now, ip);
+    this->DoStoreDump(resultid, todump, TRUE);
+    UPDATE webwerf_sites.adhocdump_dumps SET numresults := numresults + 1
+                                     , lastresultdate := now
+                                   WHERE id = this->id;
+
+    RETURN resultid;
+  }
+
+  PUBLIC MACRO DoStoreDump(INTEGER resultid, RECORD data, BOOLEAN isnew)
+  {
+    RECORD ARRAY submittedfields := UnpackRecord(data);
+    STRING ARRAY submittedfieldnames := SELECT AS STRING ARRAY ToUppercase(name) FROM submittedfields;
+    RECORD ARRAY currentfields := SELECT id, tag, type
+                                    FROM webwerf_sites.adhocdump_fields
+                                   WHERE adhocdump_fields.dump = this->id
+                                         AND tag IN submittedfieldnames;
+
+    RECORD ARRAY currentvalues;
+    IF(NOT isnew)
+      currentvalues := SELECT * FROM webwerf_sites.adhocdump_resultvalues WHERE adhocdump_resultvalues.result = resultid;
+
+    FOREVERY(RECORD field FROM submittedfields)
+    {
+      IF(ToUppercase(field.name) LIKE "DUMP_*")
+        THROW NEW Exception("Field '" || field.name || "' has an illegal name");
+
+      RECORD storevalue := AnyTypeToBlobString(field.value);
+      RECORD matchingfield := SELECT * FROM currentfields WHERE currentfields.tag = ToUppercase(field.name);
+      INTEGER fieldid;
+
+      IF(NOT RecordExists(matchingfield))
+      {
+        //Create it
+        fieldid := MakeAutonumber(webwerf_sites.adhocdump_fields, "ID");
+        INSERT INTO webwerf_sites.adhocdump_fields(id, dump, tag, type)
+               VALUES(fieldid, this->id, ToUppercase(field.name), storevalue.type);
+      }
+      ELSE IF(matchingfield.type = storevalue.type)
+      {
+        fieldid := matchingfield.id;
+      }
+      ELSE
+      {
+        THROW NEW Exception("Field '" || field.name || "' is already defined in the database but with a different type");
+      }
+
+      RECORD currentvaluerec;
+      IF(NOT isnew)
+        currentvaluerec := SELECT * FROM currentvalues WHERE currentvalues.field = VAR fieldid;
+
+      IF(RecordExists(currentvaluerec))
+      {
+        IF(storevalue.data="" AND Length(storevalue.blobdata)=0) //eliminate empty values from database
+          DELETE FROM webwerf_sites.adhocdump_resultvalues WHERE id = currentvaluerec.id;
+        ELSE
+          UPDATE webwerf_sites.adhocdump_resultvalues SET value := storevalue.data WHERE id = currentvaluerec.id;
+      }
+      ELSE IF(storevalue.data!="" OR Length(storevalue.blobdata) > 0) //eliminate empty values from database
+      {
+        INSERT INTO webwerf_sites.adhocdump_resultvalues(result, field, value, blobvalue)
+               VALUES(resultid, fieldid, storevalue.data, storevalue.blobdata);
+      }
+    }
+  }
+
+  PUBLIC RECORD FUNCTION CreateDumpRecordFromWebvars(RECORD ARRAY vars)
+  {
+    RECORD output := CELL[];
+    FOREVERY(RECORD varrec FROM vars)
+    {
+      IF(CellExists(output, varrec.name))
+        output := CellUpdate(output, varrec.name, GetCell(output, varrec.name) || ", " || varrec.value);
+      ELSE
+        output := CellInsert(output, varrec.name, varrec.value);
+    }
+    RETURN output;
+  }
+>;
+
+/** @short Open a data dump
+    @param dumptag Tag of the dump
+    @return The requested data dump. Exception if it doesn't exist */
+PUBLIC OBJECT FUNCTION OpenAdhocDumpById(INTEGER id)
+{
+  RECORD dump := SELECT * FROM webwerf_sites.adhocdump_dumps WHERE adhocdump_dumps.id = VAR id;
+  IF(RecordExists(dump))
+    RETURN NEW AdhocDump(dump);
+  THROW NEW Exception("No such adhoc dump #" || id);
+}
+
+PUBLIC OBJECT FUNCTION __nowarning__OpenAdhocDump(STRING tag)
+{
+  RECORD dump := SELECT * FROM webwerf_sites.adhocdump_dumps WHERE ToUppercase(adhocdump_dumps.tag)=ToUppercase(VAR tag);
+  IF(RecordExists(dump))
+    RETURN NEW AdhocDump(dump);
+  THROW NEW Exception("No such adhoc dump '" || tag || "'");
+}
+
+/** @short Open a data dump
+    @param dumptag Tag of the dump
+    @return The requested data dump. Exception if it doesn't exist */
+PUBLIC OBJECT FUNCTION OpenAdhocDump(STRING tag) __ATTRIBUTES__(DEPRECATED "The adhocdump has been deprecated. Switch to the new forms api")
+{
+  RETURN __nowarning__OpenAdhocDump(tag);
+}
+
+PUBLIC OBJECT FUNCTION CreateAdhocDump(STRING tag, STRING title)
+{
+  IF(tag NOT LIKE "*:*" OR tag LIKE "*:*:*" OR tag LIKE "* *")
+    THROW NEW Exception("Invalid adhocdump tag '" || tag || "'");
+  IF(RecordExists(SELECT FROM webwerf_sites.adhocdump_dumps WHERE ToUppercase(adhocdump_dumps.tag) = ToUppercase(VAR tag)))
+    THROW NEW Exception("Duplicate adhocdump tag '" || tag || "'");
+
+  INTEGER dumpid := MakeAutonumber(webwerf_sites.adhocdump_dumps, "ID");
+  INSERT INTO webwerf_sites.adhocdump_dumps(id, tag, title, creationdate)
+          VALUES(dumpid, ToUppercase(tag), title, GetCurrentDatetime());
+  RETURN NEW AdhocDump(SELECT * FROM webwerf_sites.adhocdump_dumps WHERE id=dumpid);
+}
+
+OBJECTTYPE DumpData
+<
+  RECORD dumprpc;
+
+  MACRO NEW(RECORD dumprpc)
+  {
+    this->dumprpc := dumprpc;
+  }
+
+  PUBLIC RECORD FUNCTION GetDump(INTEGER id)
+  {
+    RETURN this->dumprpc.GetDump(id);
+  }
+
+  PUBLIC BOOLEAN FUNCTION UpdateDump(INTEGER id, RECORD newdata)
+  {
+    RETURN this->dumprpc.UpdateDump(id, newdata);
+  }
+
+  PUBLIC INTEGER FUNCTION DirectDump(STRING ip, RECORD data)
+  {
+    RETURN this->dumprpc.DirectDump(ip, data);
+  }
+
+>;
+
+PUBLIC OBJECT FUNCTION CreateAdhocDumpCSVExportDialog(OBJECT parentscreen, OBJECT adhocdump)
+{
+  OBJECT exportdialog := CreateColumnFileExportDialog(parentscreen);
+
+  INTEGER dumpid := adhocdump->id;
+
+  RECORD ARRAY cols := SELECT *
+                         FROM webwerf_sites.adhocdump_fields
+                        WHERE dump = dumpid
+                              AND type != 10 //skip blobs
+                     ORDER BY id; //FIXME allow user to set ordering and titles
+
+  exportdialog->columns := [[ name := "dump_creationdate"
+                            , title := "Submitted"
+                            , type := "datetime"
+                            , storeutc := TRUE
+                            ]
+                           ,[ name := "dump_ip"
+                            , title := "IP"
+                            , type := "text"
+                            ]
+                           ,[ name := "dump_id"
+                            , title := "ID"
+                            , type := "integer"
+                            ]
+                           ]
+                           CONCAT SELECT name :=tag
+                                       , title := tag
+                                       , type := MapType(type)
+                                    FROM cols;
+
+  RECORD ARRAY results := SELECT id, creationdate, modificationdate, ip
+                            FROM webwerf_sites.adhocdump_results
+                           WHERE dump = dumpid;
+
+  INTEGER ARRAY validfields := SELECT AS INTEGER ARRAY id FROM cols;
+  RECORD ARRAY resultvals := SELECT adhocdump_resultvalues.*
+                               FROM webwerf_sites.adhocdump_results, webwerf_sites.adhocdump_resultvalues
+                              WHERE adhocdump_results.dump = dumpid
+                                    AND adhocdump_resultvalues.result = adhocdump_results.id
+                                    AND field IN validfields
+                           ORDER BY result, field;
+
+  FOREVERY(RECORD result FROM results)
+  {
+    //ADDME use binary searches
+    RECORD row := [ dump_creationdate := result.creationdate
+                  , dump_modificationdate := result.modificationdate
+                  , dump_ip := result.ip
+                  , dump_id := result.id
+                  ];
+
+    RECORD ARRAY relevantresults := SELECT * FROM resultvals WHERE resultvals.result = VAR result.id;
+    row := DecodeResults(row, cols, relevantresults);
+    INSERT row INTO exportdialog->rows AT END;
+  }
+
+  exportdialog->rows := SELECT * FROM exportdialog->rows ORDER BY dump_creationdate;
+
+  RETURN exportdialog;
+}
+
+PUBLIC OBJECTTYPE DumpDescriber EXTEND ObjectTypeDescriber
+< PUBLIC UPDATE RECORD FUNCTION DescribeObject(INTEGER objectid)
+  {
+    RETURN
+        SELECT id
+             , name := title
+             , icon := "system:sysmgmt/adhoccache"
+          FROM webwerf_sites.adhocdump_dumps
+         WHERE id = objectid;
+  }
+
+  PUBLIC UPDATE INTEGER ARRAY FUNCTION GetRootObjects(OBJECT user)
+  {
+    RETURN
+        SELECT AS INTEGER ARRAY id
+          FROM webwerf_sites.adhocdump_dumps
+         WHERE user->HasRightOn("system:adhocdump_viewresults", id); // also works for wrd:readwrite and wrd:metadata
+  }
+
+  PUBLIC UPDATE BOOLEAN FUNCTION IsObjectVisibleForUser(INTEGER id, OBJECT user)
+  {
+    RETURN user->HasRightOn("system:adhocdump_viewresults", id);
+  }
+>;

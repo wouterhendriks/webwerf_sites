@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<screens xmlns="http://www.webhare.net/xmlns/tollium/screens"
+        lib="screens/adhocdump/dumpsmgr.whlib"
+        gid="adhocdump.dumpsmgr">
+
+  <messageboxes gid=".messages">
+    <messagebox name="verifyresetdump" buttons="yes no" icon="question"/>
+    <messagebox name="verifydeletedump" buttons="yes no" icon="question"/>
+  </messageboxes>
+
+  <screen name="main" allowresize="true" gid=".main" tid="adhocdump.dumpsmgr.apptitle" menubar="menubar" flags="managedumps" icon="system:sysmgmt/adhoccache">
+    <actions>
+      <action name="add" onexecute="doadd" frameflags="managedumps" tid="tollium:common.actions.add">
+      </action>
+      <action name="edit" onexecute="doedit" tid="tollium:common.actions.edit">
+        <enableon source="dumps" min="1" max="1" checkflags="canmanage" />
+      </action>
+      <action name="reset" onexecute="doreset">
+        <enableon source="dumps" min="1" max="1" checkflags="canmanage" />
+      </action>
+      <action name="delete" onexecute="dodelete" tid="tollium:common.actions.delete">
+        <enableon source="dumps" min="1" max="1" checkflags="canmanage" />
+      </action>
+      <action name="deletebyid" onexecute="dodeletebyid">
+        <enableon source="dumps" min="1" max="1" checkflags="canedit" />
+      </action>
+      <action name="open" onexecute="doopen" tid="tollium:common.actions.export">
+        <enableon source="dumps" min="1" max="1"  />
+      </action>
+    </actions>
+    <menus>
+      <menu name="menubar">
+        <item action="add" name="addmenuitem" tid="tollium:common.actions.add" />
+        <item action="edit" name="editmenuitem" tid="tollium:common.actions.edit" />
+        <divider />
+        <item action="open" name="openmenuitem" tid="tollium:common.actions.export" />
+        <divider />
+        <item action="deletebyid" name="deletebyidmenuitem" tid=".deletebyid" />
+        <divider />
+        <item action="reset" name="resetmenuitem" tid=".reset" />
+        <item action="delete" name="deletemenuitem" tid="tollium:common.actions.delete" />
+      </menu>
+      <menu name="dumpsnewcontext">
+        <item action="add" disablemode="hidden" />
+      </menu>
+      <menu name="dumpsselectcontext">
+        <item action="edit" disablemode="hidden" />
+        <divider />
+        <item action="open" disablemode="hidden" />
+        <divider />
+        <item action="deletebyid" disablemode="hidden" />
+        <divider />
+        <item action="reset" disablemode="hidden" />
+        <item action="delete" disablemode="hidden"  />
+      </menu>
+    </menus>
+    <toolbar>
+      <button action="add" icon="tollium:actions/add" name="addbutton" tid="tollium:common.actions.add" />
+      <button action="edit" icon="tollium:actions/edit" name="editbutton" tid="tollium:common.actions.edit" />
+      <button action="delete" icon="tollium:actions/delete" name="deletebutton" tid="tollium:common.actions.delete" />
+    </toolbar>
+    <body spacers="none">
+      <list name="dumps"
+            selectmode="single"
+            flags="canmanage canedit"
+            openaction="open"
+            newcontextmenu="dumpsnewcontext"
+            selectcontextmenu="dumpsselectcontext"
+            borders="none">
+        <column name="title" type="text" />
+        <column name="numresults" type="integer" />
+      </list>
+    </body>
+  </screen>
+
+  <screen name="dumpprops" gid=".dumpprops" tid=".screentitle">
+    <body>
+      <textedit name="tag" required="true" />
+      <textedit name="title" required="true" />
+      <textarea name="description" />
+    </body>
+    <footer>
+      <defaultformbuttons buttons="ok cancel" />
+    </footer>
+  </screen>
+
+  <screen name="deletebyid" gid=".deletebyid" tid=".screentitle">
+    <body layout="left">
+      <text valuetid=".aboutdeletion" />
+      <textedit name="resultid" valuetype="integer" />
+    </body>
+    <footer>
+      <defaultformbuttons buttons="ok cancel" />
+    </footer>
+  </screen>
+</screens>

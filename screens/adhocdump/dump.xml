@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<screens xmlns="http://www.webhare.net/xmlns/tollium/screens"
+        lib="screens/adhocdump/dump.whlib"
+        gid="adhocdump.dump">
+
+  <messageboxes gid=".messages">
+    <messagebox name="verifydeleteresult" buttons="yes no" icon="question"/>
+  </messageboxes>
+
+  <screen name="overview" gid=".overview" tid=".screentitle" flags="editresults fullaccess">
+    <actions>
+      <action name="export" onexecute="doexport" />
+    </actions>
+    <body>
+      <select name="exporttype" type="radio">
+        <option rowkey="csv" />
+        <option rowkey="zip" />
+      </select>
+    </body>
+    <footer>
+      <line layout="right">
+        <button action="export" />
+        <button tid="tollium:common.actions.cancel" tolliumresult="cancel"/>
+      </line>
+    </footer>
+  </screen>
+
+</screens>

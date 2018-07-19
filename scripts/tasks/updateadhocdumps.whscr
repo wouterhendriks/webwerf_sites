@@ -1,0 +1,43 @@
+﻿<?wh
+LOADLIB "mod::system/lib/database.whlib";
+LOADLIB "mod::system/lib/adhocdump.whlib";
+LOADLIB "mod::system/lib/resources.whlib";
+
+/*
+RECORD args := ParseArguments(GetConsoleArguments(),
+    [ [ name := "schemanames", type := "paramlist" ]
+    ]);
+
+IF (NOT RecordExists(args))
+{
+  PRINT("Syntax: wh updateadhocdumps [ schemanames ]\n");
+  RETURN;
+}
+*/
+
+OBJECT trans := OpenPrimary();
+trans->BeginWork();
+
+abort(GetCustomModuleSettings("http://www.webhare.net/xmlns/system/moduledefinition", "adhocdump"));
+
+FOREVERY(RECORD check FROM GetCustomModuleSettings("http://www.webhare.net/xmlns/system/moduledefinition", "adhocdump"))
+{
+  STRING tag := check.module || ":" || check.node->GetAttribute("tag");
+  TRY
+  {
+    __nowarning__OpenAdhocDump(tag);
+    CONTINUE;
+  }
+  CATCH ; //create it!
+
+  TRY
+  {
+    CreateAdhocDump(tag, check.node->GetAttribute("title"));
+  }
+  CATCH(OBJECT e)
+  {
+    Print("Failed to create adhocdump '" || tag || "': " || e->what || "\n");
+  }
+}
+
+trans->CommitWork();

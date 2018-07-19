@@ -8,5 +8,78 @@
     <packaging download="true" />
   </meta>
 
+  <servicemanager>
+    <!-- <runatstartup script="tasks/updateadhocdumps.whscr" when="afterlaunch" /> -->
+  </servicemanager>
+
+  <databaseschema xmlns:d="http://www.webhare.net/xmlns/whdb/databaseschema">
+    <d:grant permissions="all" grantee=".moduleowner" />
+
+    <d:table name="adhocdump_dumps" primarykey="id">
+      <d:integer name="id" autonumberstart="1" />
+      <d:varchar name="tag" maxlength="64" nullable="false" unique="true"/>
+      <d:datetime name="creationdate" nullable="false" />
+      <d:datetime name="lastresultdate" />
+      <d:varchar name="title" maxlength="256" />
+      <d:varchar name="description" maxlength="1024" />
+      <d:integer name="numresults" />
+    </d:table>
+    <d:table name="adhocdump_fields" primarykey="id">
+      <d:integer name="id" autonumberstart="1" />
+      <d:integer name="dump" references=".adhocdump_dumps" ondelete="cascade" nullable="0"/>
+      <d:varchar name="tag" maxlength="64" nullable="false" />
+      <d:integer name="type" />
+    </d:table>
+    <d:table name="adhocdump_results" primarykey="id">
+      <d:integer name="id" autonumberstart="1" />
+      <d:integer name="dump" references=".adhocdump_dumps" ondelete="cascade" nullable="0"/>
+      <d:datetime name="creationdate" nullable="false" />
+      <d:datetime name="modificationdate" nullable="false" />
+      <d:varchar name="ip" maxlength="64" />
+    </d:table>
+    <d:table name="adhocdump_resultvalues" primarykey="id">
+      <d:integer name="id" autonumberstart="1" />
+      <d:integer name="result" references=".adhocdump_results" ondelete="cascade" nullable="0"/>
+      <d:integer name="field" references=".adhocdump_fields" ondelete="cascade" nullable="0"/>
+      <d:varchar name="value" maxlength="4096" />
+      <d:blob name="blobvalue" />
+    </d:table>
+  </databaseschema>
+
+  <portal>
+    <application name="dumpsmgr" tid="adhocdump.dumpsmgr.apptitle" screen="adhocdump/dumpsmgr.main" group="system:apps" icon="system:sysmgmt/adhoccache">
+       <accesscheck>
+        <requireright right="adhocdump_viewresults" />
+      </accesscheck>
+    </application>
+  </portal>
+
+  <rights>
+    <objecttype name="dumps"
+                table=".adhocdump_dumps"
+                tid="rights.adhocdumps"
+                icon="system:sysmgmt/adhoccache">
+      <describer library="lib/adhocdump.whlib" objectname="dumpdescriber">
+      </describer>
+    </objecttype>
+
+    <right name="adhocdump_fullaccess" tid="rights.adhocdump_fullaccess" descriptiontid="rights.adhocdump_fullaccess-descr" objecttype="dumps">
+      <impliedby right="system:sysop" />
+    </right>
+
+    <right name="adhocdump_editresults" tid="rights.adhocdump_editresults" descriptiontid="rights.adhocdump_editresults-descr" objecttype="dumps">
+      <impliedby right="adhocdump_fullaccess" />
+    </right>
+
+    <right name="adhocdump_viewresults" tid="rights.adhocdump_viewresults" descriptiontid="rights.adhocdump_viewresults-descr" objecttype="dumps">
+      <impliedby right="adhocdump_editresults" />
+    </right>
+
+  </rights>
+
+  <backend>
+    <webrule path="allroots:/.adhocserve/" redirecttoscript="internal/adhocserve.shtml" match="initial" />
+  </backend>
+
 </module>
 
