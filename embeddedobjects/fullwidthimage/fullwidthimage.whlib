@@ -8,7 +8,7 @@ PUBLIC OBJECTTYPE FullWidthImage EXTEND WidgetBase
 <
   UPDATE PUBLIC MACRO Render()
   {
-    RECORD data := [ image := WrapCachedImage(this->data.image, [ method := "fit", setwidth := 1920 ])
+    RECORD data := [ image := WrapCachedImage(this->data.image, [ method := "none" ])
                    ];
 
     this->EmbedComponent(data);

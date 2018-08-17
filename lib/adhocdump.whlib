@@ -503,11 +503,11 @@ PUBLIC OBJECTTYPE DumpDescriber EXTEND ObjectTypeDescriber
     RETURN
         SELECT AS INTEGER ARRAY id
           FROM webwerf_sites.adhocdump_dumps
-         WHERE user->HasRightOn("system:adhocdump_viewresults", id); // also works for wrd:readwrite and wrd:metadata
+         WHERE user->HasRightOn("webwerf_sites:adhocdump_viewresults", id); // also works for wrd:readwrite and wrd:metadata
   }
 
   PUBLIC UPDATE BOOLEAN FUNCTION IsObjectVisibleForUser(INTEGER id, OBJECT user)
   {
-    RETURN user->HasRightOn("system:adhocdump_viewresults", id);
+    RETURN user->HasRightOn("webwerf_sites:adhocdump_viewresults", id);
   }
 >;

@@ -56,7 +56,7 @@
 
   <rights>
     <objecttype name="dumps"
-                table=".adhocdump_dumps"
+                table="webwerf_sites.adhocdump_dumps"
                 tid="rights.adhocdumps"
                 icon="system:sysmgmt/adhoccache">
       <describer library="lib/adhocdump.whlib" objectname="dumpdescriber">

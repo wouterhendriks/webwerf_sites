@@ -14,7 +14,7 @@
       </textgroup>
     </textgroup>
     <textgroup gid="dumpsmgr">   <!-- adhocdump.dumpsmgr -->
-      <text tid="apptitle">Data-opslag (x)</text>
+      <text tid="apptitle">Data-opslag</text>
       <textgroup gid="deletebyid">   <!-- adhocdump.dumpsmgr.deletebyid -->
         <text tid="aboutdeletion">Een specifiek resultaat kan verwijderd worden door de waarde in de ID kolom (de kolom gemarkeerd als 'ID' in de export) op te geven.<br/><br/>Verwijderen is permanent en kan niet teruggedraaid worden, dus we raden u aan uw vorige export als reservekopie te bewaren.</text>
         <text tid="nosuchresult">Geen resultaat met het opgegeven id gevonden</text>

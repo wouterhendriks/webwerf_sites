@@ -8,7 +8,10 @@ let cookieBarNode;
 
 export function init(options) {
   if (!WHBase.config.site.wwcookiename)
-    return console.error('no cookie name set')
+    return console.error('no cookie name set');
+
+  if (location.href.includes('resetcookiebar='))
+    cookie.remove(WHBase.config.site.wwcookiename);
 
   cookieBarNode = dompack.qS('.ww-cookiebar');
   if (!cookieBarNode)
