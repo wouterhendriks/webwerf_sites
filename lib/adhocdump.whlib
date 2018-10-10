@@ -479,6 +479,16 @@ PUBLIC OBJECT FUNCTION CreateAdhocDumpCSVExportDialog(OBJECT parentscreen, OBJEC
 
     RECORD ARRAY relevantresults := SELECT * FROM resultvals WHERE resultvals.result = VAR result.id;
     row := DecodeResults(row, cols, relevantresults);
+
+    FOREVERY (RECORD row_unpacked FROM UnpackRecord(row))
+    {
+      IF (TypeID(row_unpacked.value) = TypeID(blob))
+      {
+        row := CellDelete(row, row_unpacked.name);
+        row := CellInsert(row, row_unpacked.name, BlobToString(row_unpacked.value, -1));
+      }
+    }
+
     INSERT row INTO exportdialog->rows AT END;
   }
 
@@ -490,6 +500,7 @@ PUBLIC OBJECT FUNCTION CreateAdhocDumpCSVExportDialog(OBJECT parentscreen, OBJEC
 PUBLIC OBJECTTYPE DumpDescriber EXTEND ObjectTypeDescriber
 < PUBLIC UPDATE RECORD FUNCTION DescribeObject(INTEGER objectid)
   {
+    abort("DescribeObject");
     RETURN
         SELECT id
              , name := title
@@ -500,14 +511,16 @@ PUBLIC OBJECTTYPE DumpDescriber EXTEND ObjectTypeDescriber
 
   PUBLIC UPDATE INTEGER ARRAY FUNCTION GetRootObjects(OBJECT user)
   {
+    abort("GetRootObjects");
     RETURN
         SELECT AS INTEGER ARRAY id
           FROM webwerf_sites.adhocdump_dumps
-         WHERE user->HasRightOn("webwerf_sites:adhocdump_viewresults", id); // also works for wrd:readwrite and wrd:metadata
+         ;//WHERE user->HasRightOn("webwerf_sites:adhocdump_viewresults", id); // also works for wrd:readwrite and wrd:metadata
   }
 
   PUBLIC UPDATE BOOLEAN FUNCTION IsObjectVisibleForUser(INTEGER id, OBJECT user)
   {
+    abort("IsObjectVisibleForUser");
     RETURN user->HasRightOn("webwerf_sites:adhocdump_viewresults", id);
   }
 >;

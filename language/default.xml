@@ -66,4 +66,21 @@
     <text tid="adhocdump_viewresults-descr">Mag data-opslag resultaten exporteren</text>
     <text tid="adhocdumps">Data-opslag dumps</text>
   </textgroup>
+  <textgroup gid="siteprofile">
+    <textgroup gid="pages">
+      <textgroup gid="news">   <!-- news -->
+        <text tid="addthis_hint">Vul hieronder de AddThis JavaScript URL in, deze lijkt op //s7.addthis.com/js/300/addthis_widget.js#pubid=ra-592d281ab96ac0a8.<br/><br/>Voor meer info, zie https://sites.nubium.nl/webhare-info/contentbeheerders/.</text>
+        <text tid="foldertype">Nieuws</text>
+        <text tid="heading_image">Afbeelding</text>
+        <text tid="heading_summary">Samenvatting (introductietekst in overzicht)</text>
+        <text tid="newsdate">Nieuwsdatum</text>
+        <text tid="newsdate_optional">Nieuwsdatum (optioneel)</text>
+        <text tid="newsheading">Datum</text>
+        <text tid="placeholder_summary">Samenvatting van het nieuwsbericht voor in het overzicht</text>
+        <text tid="small_design_label">Gebruik een kleiner design voor deze nieuwsmap, zonder samenvatting</text>
+        <text tid="summary">Samenvatting</text>
+        <text tid="tab_news">Nieuwsbericht</text>
+      </textgroup>
+    </textgroup>
+  </textgroup>
 </language>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             gid="siteprofile.pages.news"
+             >
+
+  <!-- ***********************************************************************
+
+       News folder
+
+  ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/foldertype/news">
+    <member name="addthis_add" type="boolean" />
+    <member name="addthis_js_code" type="string" />
+    <member name="set_date" type="boolean" />
+    <member name="date_required" type="boolean" />
+  </contenttype>
+
+  <foldertype typedef="http://sites.webwerf.nl/foldertype/news"
+              tolliumicon="tollium:folders/news"
+              title="Nieuws"
+              protectindexfile="true"
+              >
+  </foldertype>
+
+  <tabsextension name="newsfolder" xmlns="http://www.webhare.net/xmlns/tollium/screens">
+    <newtab title="Nieuwsmap (systeembeheerders)">
+      <heading title="Instellingen" />
+      <checkbox composition="contentdata" cellname="set_date" title="" label="Vul bij nieuwsdatum initieel 'vandaag' in" value="true" />
+      <checkbox composition="contentdata" cellname="date_required" title="" label="Het is verplicht om een nieuwsdatum in te vullen" value="true" />
+
+      <hr />
+
+      <box composition="contentdata"
+           cellname="addthis_add"
+           checkbox="true"
+           hr="false"
+           enablecomponents="addthis_js_code"
+           title="Voeg AddThis toe"
+           >
+        <panel layout="left">
+          <text title="" valuetid=".addthis_hint" wordwrap="true" selectable="true" />
+          <textarea composition="contentdata"
+                    cellname="addthis_js_code"
+                    name="addthis_js_code"
+                    errorlabel="AddThis JavaScript URL"
+                    title=""
+                    width="1pr"
+                    placeholder="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-592d281ab96ac0a8"
+                    required="true"
+                    />
+        </panel>
+      </box>
+    </newtab>
+  </tabsextension>
+
+  <apply>
+    <to type="all" parenttype="http://sites.webwerf.nl/foldertype/news" />
+    <denyfiletype typedef="*" />
+    <denyfoldertype typedef="*" />
+    <allowfiletype typedef="http://www.webhare.net/xmlns/publisher/richdocumentfile" />
+  </apply>
+
+  <apply>
+    <to type="folder" foldertype="http://sites.webwerf.nl/foldertype/news" />
+    <folderindex indexfile="newfile"
+                 newfiletype="http://www.webhare.net/xmlns/publisher/richdocumentfile"
+                 newfilename="index.rtd"
+                 protectindexfile="true"
+                 />
+    <extendproperties extension=".newsfolder" contenttype="http://sites.webwerf.nl/foldertype/news" requireright="nope:superuser" />
+  </apply>
+
+  <!-- ***********************************************************************
+
+       News folder index file
+
+  ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/filetype/newsindex"></contenttype>
+
+  <filetype typedef="http://sites.webwerf.nl/filetype/newsindex"
+            title="Nieuwsoverzicht"
+            tolliumicon="tollium:files/application_x-webhare-richdocument"
+            blobiscontent="false"
+            needstemplate="true"
+            needsprofile="false"
+            ispublishable="true"
+            requirescontent="false"
+            isacceptableindex="true"
+            ispublishedassubdir="true"
+            extensions=".rtd"
+            />
+
+  <apply>
+    <to type="file" filetype="http://sites.webwerf.nl/filetype/newsindex" />
+    <setobjecteditor name="publisher:editdocument" />
+  </apply>
+
+  <!-- ***********************************************************************
+
+       News file (RTD)
+
+  ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/filetype/newsitem">
+    <member name="image" type="file" />
+    <member name="date" type="datetime" />
+    <member name="summary" type="string" />
+  </contenttype>
+
+  <tabsextension name="newsitem"
+                 xmlns="http://www.webhare.net/xmlns/tollium/screens"
+                 implementation="lib"
+                 lib="mod::webwerf_sites/lib/publisher/news.whlib"
+                 >
+    <newtab tid=".tab_news">
+      <heading tid=".heading_summary" name="summaryheading" />
+      <textarea composition="contentdata" cellname="summary" width="1pr" height="5x" required="true" title="" errorlabeltid=".summary" placeholdertid=".placeholder_summary" name="summary" />
+
+      <heading name="newsheading" /> <!-- title set by publisher.whlib -->
+      <datetime composition="contentdata" cellname="date" type="date" title="" errorlabel="Nieuwsdatum" name="date" />
+
+      <heading tid=".heading_image" />
+      <panel layout="left">
+        <imgedit composition="contentdata"
+                 cellname="image"
+                 title=""
+                 width="300px"
+                 height="200px"
+                 preserveifunchanged="true"
+                 allowedactions="all refpoint"
+                 errorlabeltid=".heading_image"
+                 publisher="false"
+                 required="true"
+                 />
+      </panel>
+    </newtab>
+  </tabsextension>
+
+  <apply>
+    <to type="file" filetype="http://www.webhare.net/xmlns/publisher/richdocumentfile" parenttype="http://sites.webwerf.nl/foldertype/news" />
+    <extendproperties extension=".newsitem" contenttype="http://sites.webwerf.nl/filetype/newsitem" />
+  </apply>
+
+  <!-- ***********************************************************************
+
+       Body renderers
+
+  *********************************************************************** -->
+  <!-- BYO
+  <apply>
+    <to type="index" parenttype="http://sites.webwerf.nl/foldertype/news" />
+    <to type="file" filetype="http://www.webhare.net/xmlns/publisher/richdocumentfile" parenttype="http://sites.webwerf.nl/foldertype/news" />
+    <bodyrenderer library="news.whlib" objectname="newspage" />
+  </apply>
+   -->
+
+</siteprofile>

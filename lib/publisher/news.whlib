@@ -1,0 +1,43 @@
+<?wh
+LOADLIB "wh::datetime.whlib";
+LOADLIB "mod::tollium/lib/commondialogs.whlib";
+LOADLIB "mod::tollium/lib/screenbase.whlib";
+LOADLIB "mod::system/lib/whfs.whlib";
+
+PUBLIC OBJECTTYPE NewsItem EXTEND TolliumTabsExtensionBase
+<
+  OBJECT tabs;
+
+  UPDATE PUBLIC MACRO InitExtension(OBJECT tabs)
+  {
+    this->tabs := tabs;
+  }
+
+  UPDATE PUBLIC MACRO PostInitExtension()
+  {
+    RECORD whfsinstance := SELECT * FROM this->tabs->extendcomponents WHERE name = "contentdata";
+
+    OBJECT appcontext := this->GetAppContext("publisher:objectpropsapi");
+    OBJECT targetfolder := appcontext->targetfolder;
+
+    OBJECT targetobject := whfsinstance.component->basefsobject;
+    BOOLEAN isnew := NOT ObjectExists(targetobject);
+
+    RECORD foldersettings := targetfolder->GetInstanceData("http://sites.webwerf.nl/foldertype/news");
+
+    IF (foldersettings.date_required)
+    {
+      this->newsheading->title := GetTid("webwerf_sites:siteprofile.pages.news.newsdate");
+      this->date->required := TRUE;
+    }
+    ELSE
+    {
+      this->newsheading->title := GetTid("webwerf_sites:siteprofile.pages.news.newsdate_optional");//"Nieuwsdatum (optioneel)";
+    }
+
+    this->date->errorlabel := this->newsheading->title;
+
+    IF (foldersettings.set_date AND isnew)
+      this->date->value := UTCToLocal(GetCurrentDateTime(), "CET");
+  }
+>;

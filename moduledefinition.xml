@@ -68,17 +68,17 @@
     </right>
 
     <right name="adhocdump_editresults" tid="rights.adhocdump_editresults" descriptiontid="rights.adhocdump_editresults-descr" objecttype="dumps">
-      <impliedby right="adhocdump_fullaccess" />
+      <impliedby right="webwerf_sites:adhocdump_fullaccess" />
     </right>
 
     <right name="adhocdump_viewresults" tid="rights.adhocdump_viewresults" descriptiontid="rights.adhocdump_viewresults-descr" objecttype="dumps">
-      <impliedby right="adhocdump_editresults" />
+      <impliedby right="webwerf_sites:adhocdump_editresults" />
     </right>
 
   </rights>
 
   <backend>
-    <webrule path="allroots:/.adhocserve/" redirecttoscript="internal/adhocserve.shtml" match="initial" />
+    <!-- <webrule path="allroots:/.adhocserve/" redirecttoscript="internal/adhocserve.shtml" match="initial" /> -->
   </backend>
 
 </module>
