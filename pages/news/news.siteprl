@@ -67,7 +67,7 @@
                  newfilename="index.rtd"
                  protectindexfile="true"
                  />
-    <extendproperties extension=".newsfolder" contenttype="http://sites.webwerf.nl/foldertype/news" requireright="nope:superuser" />
+    <extendproperties extension=".newsfolder" contenttype="http://sites.webwerf.nl/foldertype/news" requireright="system:sysop" />
   </apply>
 
   <!-- ***********************************************************************
