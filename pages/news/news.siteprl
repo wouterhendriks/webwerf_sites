@@ -13,6 +13,10 @@
     <member name="addthis_js_code" type="string" />
     <member name="set_date" type="boolean" />
     <member name="date_required" type="boolean" />
+    <member name="no_dates" type="boolean" />
+    <member name="own_image" type="boolean" />
+    <member name="own_image_whfstype" type="string" />
+    <member name="own_image_whfsmember" type="string" />
   </contenttype>
 
   <foldertype typedef="http://sites.webwerf.nl/foldertype/news"
@@ -25,6 +29,7 @@
   <tabsextension name="newsfolder" xmlns="http://www.webhare.net/xmlns/tollium/screens">
     <newtab title="Nieuwsmap (systeembeheerders)">
       <heading title="Instellingen" />
+      <checkbox composition="contentdata" cellname="no_dates" title="" label="Gebruik geen datums" /> <!-- FIXME: disable of remove following 2 options -->
       <checkbox composition="contentdata" cellname="set_date" title="" label="Vul bij nieuwsdatum initieel 'vandaag' in" value="true" />
       <checkbox composition="contentdata" cellname="date_required" title="" label="Het is verplicht om een nieuwsdatum in te vullen" value="true" />
 
@@ -33,7 +38,6 @@
       <box composition="contentdata"
            cellname="addthis_add"
            checkbox="true"
-           hr="false"
            enablecomponents="addthis_js_code"
            title="Voeg AddThis toe"
            >
@@ -50,6 +54,18 @@
                     />
         </panel>
       </box>
+
+      <box composition="contentdata"
+           cellname="own_image"
+           checkbox="true"
+           enablecomponents="own_image_whfstype own_image_whfsmember"
+           title="Gebruik eigen afbeelding"
+           >
+        <textedit composition="contentdata" cellname="own_image_whfstype" name="own_image_whfstype" title="WHFS type"
+                  placeholder="http://sites.webwerf.nl/filetype/newsitem" required="true" width="1pr"
+                  />
+        <textedit composition="contentdata" cellname="own_image_whfsmember" name="own_image_whfsmember" title="Siteprof member" placeholder="image" required="true" width="1pr" />
+      </box>
     </newtab>
   </tabsextension>
 
@@ -63,7 +79,7 @@
   <apply>
     <to type="folder" foldertype="http://sites.webwerf.nl/foldertype/news" />
     <folderindex indexfile="newfile"
-                 newfiletype="http://www.webhare.net/xmlns/publisher/richdocumentfile"
+                 newfiletype="http://sites.webwerf.nl/filetype/newsindex"
                  newfilename="index.rtd"
                  protectindexfile="true"
                  />
@@ -127,7 +143,7 @@
                  height="200px"
                  preserveifunchanged="true"
                  allowedactions="all refpoint"
-                 errorlabeltid=".heading_image"
+                 errorlabeltid=".image"
                  publisher="false"
                  required="true"
                  />

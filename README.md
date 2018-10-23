@@ -77,6 +77,7 @@ CSS:
 
 ```
 @import '~@mod-webwerf_sites/embeddedobjects/twocolumnstext/twocolumnstext';
+@include twocolumnstext(35px); // margin-in-between
 ```
 
 # Cookie bar
@@ -138,7 +139,13 @@ PUBLIC OBJECTTYPE ... EXTEND WebDesignBase
            ];
 ```
 
-Don't forget to add '[cookiebar]' to your main Witty file, probably at the top of the page.
+## Witty
+
+In the main witty (for example at the end of `[component htmlbody]`):
+
+```
+[cookiebar]
+```
 
 ## SCSS
 

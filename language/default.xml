@@ -71,8 +71,9 @@
       <textgroup gid="news">   <!-- news -->
         <text tid="addthis_hint">Vul hieronder de AddThis JavaScript URL in, deze lijkt op //s7.addthis.com/js/300/addthis_widget.js#pubid=ra-592d281ab96ac0a8.<br/><br/>Voor meer info, zie https://sites.nubium.nl/webhare-info/contentbeheerders/.</text>
         <text tid="foldertype">Nieuws</text>
-        <text tid="heading_image">Afbeelding</text>
+        <text tid="heading_image">Afbeelding (overzicht)</text>
         <text tid="heading_summary">Samenvatting (introductietekst in overzicht)</text>
+        <text tid="image">Afbeelding</text>
         <text tid="newsdate">Nieuwsdatum</text>
         <text tid="newsdate_optional">Nieuwsdatum (optioneel)</text>
         <text tid="newsheading">Datum</text>

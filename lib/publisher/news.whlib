@@ -35,6 +35,13 @@ PUBLIC OBJECTTYPE NewsItem EXTEND TolliumTabsExtensionBase
       this->newsheading->title := GetTid("webwerf_sites:siteprofile.pages.news.newsdate_optional");//"Nieuwsdatum (optioneel)";
     }
 
+    IF (foldersettings.no_dates)
+    {
+      this->date->required := FALSE;
+      this->date->visible := FALSE;
+      this->newsheading->visible := FALSE;
+    }
+
     this->date->errorlabel := this->newsheading->title;
 
     IF (foldersettings.set_date AND isnew)

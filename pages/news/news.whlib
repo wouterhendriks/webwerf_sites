@@ -18,18 +18,28 @@ PUBLIC STATIC OBJECTTYPE WWNewsAPI
     RECORD ARRAY news :=
          SELECT id
               , title
+              , ordering
               , link := indexurl
            FROM system.fs_objects
           WHERE parent = this->newsfolder->id
                 AND type = rtdtype->id
                 AND title != ""
-                AND indexurl != ""
-       ORDER BY ordering, ToUpperCase(title), id
-          LIMIT (limitnum > 0 ? limitnum : 999999);
+                AND indexurl != "";
 
     OBJECT newstype := OpenWHFSType("http://sites.webwerf.nl/filetype/newsitem");
 
-    RETURN newstype->Enrich(news, "id", [ "image","date","summary" ]);
+    RECORD newsfoldersettings := this->newsfolder->GetInstanceData("http://sites.webwerf.nl/foldertype/news");
+    IF (newsfoldersettings.no_dates) // order by ordering
+      RETURN SELECT *
+               FROM newstype->Enrich(news, "id", [ "image","summary" ])
+           ORDER BY ordering, ToUpperCase(title), id
+              LIMIT (limitnum > 0 ? limitnum : 999999);
+
+    // order by date
+    RETURN SELECT *
+             FROM newstype->Enrich(news, "id", [ "image","date","summary" ])
+         ORDER BY date, ordering, ToUpperCase(title), id
+            LIMIT (limitnum > 0 ? limitnum : 999999);
   }
 >;
 

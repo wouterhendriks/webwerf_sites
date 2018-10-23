@@ -11,8 +11,8 @@
           </div>
         </div>
         <div class="ww-cookiebar__col ww-cookiebar__col--buttons">
-          <a class="button ww-cookiebar__button ww-cookiebar__button--accept">[if button_accept][button_accept][else]Accepteren[/if]</a>
-          <a class="button ww-cookiebar__button ww-cookiebar__button--decline">[if button_decline][button_decline][else]Afwijzen[/if]</a>
+          <a href="#" class="button ww-cookiebar__button ww-cookiebar__button--accept">[if button_accept][button_accept][else]Accepteren[/if]</a>
+          <a href="#" class="button ww-cookiebar__button ww-cookiebar__button--decline">[if button_decline][button_decline][else]Afwijzen[/if]</a>
         </div>
       </div>
     </div>
