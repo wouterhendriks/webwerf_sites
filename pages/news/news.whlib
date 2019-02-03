@@ -30,10 +30,12 @@ PUBLIC STATIC OBJECTTYPE WWNewsAPI
 
     RECORD newsfoldersettings := this->newsfolder->GetInstanceData("http://sites.webwerf.nl/foldertype/news");
     IF (newsfoldersettings.no_dates) // order by ordering
+    {
       RETURN SELECT *
                FROM newstype->Enrich(news, "id", [ "image","summary" ])
            ORDER BY ordering, ToUpperCase(title), id
               LIMIT (limitnum > 0 ? limitnum : 999999);
+    }
 
     // order by date
     RETURN SELECT *

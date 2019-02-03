@@ -11,6 +11,57 @@ wh softreset
 wh fixmodules webwerf_sites
 ```
 
+# Folders
+
+## News folder
+
+A news folder containing an (RTD) index file and news detail pages.
+
+News folder namespace: http://sites.webwerf.nl/foldertype/news
+
+### Site profile
+
+You'll need to set your own body renderer and apply site profile.
+
+```
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile">
+  <apply>
+    <to type="index" parenttype="http://sites.webwerf.nl/foldertype/news" />
+    <to type="file" filetype="http://www.webhare.net/xmlns/publisher/richdocumentfile" parenttype="http://sites.webwerf.nl/foldertype/news" />
+    <bodyrenderer library="news.whlib" objectname="newspage" />
+  </apply>
+
+  <applysiteprofile fullpath="mod::webwerf_sites/pages/news/news.siteprl" />
+</siteprofile>
+```
+
+### WHLIB
+
+Example for overview:
+
+```
+LOADLIB "mod::webwerf_sites/pages/news/news.whlib";
+
+OBJECT newsapi := NEW WWNewsAPI;
+newsapi->newsfolder := webdesign->targetsite->OpenByPath("nieuws", [ expect := "folder" ]);
+
+RECORD ARRAY news :=
+     SELECT *
+          , image_css := webdesign->GetImageCSS(image, [ method := "fit", setwidth := 1920, quality := 90, format := "image/jpeg" ])
+       FROM newsapi->GetNewsItems(-1);
+```
+
+## Search folder
+
+A (Consilio) search folder containing a search file. Settings can be set from the folder properties.
+
+### Site profile
+
+```
+<applysiteprofile path="mod::webwerf_sites/pages/search/search.siteprl" />
+```
+
 # Embedded objects
 
 This modules provides the following embedded objects:

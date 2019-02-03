@@ -1,0 +1,29 @@
+[component searchresults]
+  <div class="p-search">
+    <h1 class="p-search__heading">Zoeken</h1>
+    <form class="p-search__form" method="get" action="">
+      <input type="text" value="[words]" name="words" class="p-search__forminput">
+      <button type="submit" class="button p-search__formsearchbutton">Zoeken</button>
+    </form>
+
+    <div class="p-search__resulttitle">
+      [resultsstr]
+    </div>
+
+    <div class="p-search__results">
+      <div class="p-results">
+        [forevery results]
+          <div class="p-results__row">
+            <div class="p-results__description">
+              <a href="[link]" class="p-results__title">[title]</a>
+              <div class="p-results__summary">
+                [description:none]<br />
+                <a class="p-results__readmore" href="[link]">Lees meer</a>
+              </div>
+            </div>
+          </div>
+        [/forevery]
+      </div>
+    </div>
+  </div>
+[/component]

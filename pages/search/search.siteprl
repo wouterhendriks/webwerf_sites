@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
+             gid="siteprofile.pages.search"
+             >
+
+  <!-- ***********************************************************************
+
+       Search folder
+
+  ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/foldertype/search">
+    <member name="catalogname" type="string" />
+    <member name="languagecode" type="string" />
+    <member name="restrictfolder" type="whfsref" />
+  </contenttype>
+
+  <foldertype typedef="http://sites.webwerf.nl/foldertype/search"
+              tid=".foldertype"
+              tolliumicon="tollium:folders/search"
+              >
+  </foldertype>
+
+  <tabsextension name="searchfolder" xmlns="http://www.webhare.net/xmlns/tollium/screens">
+    <newtab title="Zoekpagina*">
+      <heading title="Consilio-instellingen" />
+      <textedit composition="contentdata" cellname="catalogname" title="Catalogusnaam" width="1pr" required="true" />
+      <line>
+        <textedit composition="contentdata" cellname="languagecode" title="Taalcode" width="1pr" required="true" value="NL" maxlength="2" />
+        <text value="(NL, EN, DE, etc)" />
+      </line>
+      <line>
+        <p:browseforobject composition="contentdata"
+                           cellname="restrictfolder"
+                           title="Restrictfolder"
+                           width="1pr"
+                           acceptfolders="true"
+                           />
+        <text value="(bij niet invullen wordt de site gebruikt)" />
+      </line>
+    </newtab>
+  </tabsextension>
+
+  <apply>
+    <to type="all" parenttype="http://sites.webwerf.nl/foldertype/search" />
+    <denyfiletype typedef="*" />
+    <denyfoldertype typedef="*" />
+  </apply>
+
+  <apply>
+    <to type="folder" foldertype="http://sites.webwerf.nl/foldertype/search" />
+    <folderindex indexfile="newfile"
+                 newfiletype="http://sites.webwerf.nl/filetype/search"
+                 newfilename="index"
+                 protectindexfile="true"
+                 />
+    <extendproperties extension=".searchfolder" contenttype="http://sites.webwerf.nl/foldertype/search" requireright="system:sysop" />
+  </apply>
+
+  <!-- ***********************************************************************
+
+       Search file
+
+  ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/filetype/search" />
+
+  <filetype typedef="http://sites.webwerf.nl/filetype/search"
+            tid=".filetype"
+            tolliumicon="tollium:actions/search"
+            blobiscontent="false"
+            isacceptableindex="true"
+            ispublishable="true"
+            >
+    <dynamicexecution library="search.whlib" webpageobjectname="SearchPage" cachewebvariables="*" />
+  </filetype>
+
+</siteprofile>

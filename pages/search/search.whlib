@@ -1,0 +1,81 @@
+<?wh
+
+LOADLIB "wh::witty.whlib";
+
+LOADLIB "mod::consilio/lib/search.whlib";
+
+LOADLIB "mod::publisher/lib/webdesign.whlib";
+
+LOADLIB "mod::system/lib/database.whlib";
+LOADLIB "mod::system/lib/webserver.whlib";
+LOADLIB "mod::system/lib/whfs.whlib";
+
+
+INTEGER maxresults := 25;
+
+PUBLIC OBJECTTYPE SearchPage EXTEND WebPageBase
+<
+  OBJECT searcher;
+
+  UPDATE PUBLIC MACRO PTR FUNCTION GetPageBody()
+  {
+    INSERT "page-search" INTO this->webdesign->htmlclasses AT END;
+
+    RECORD foldersettings := this->webdesign->targetfolder->GetInstanceData("http://sites.webwerf.nl/foldertype/search");
+
+    this->searcher := OpenSearchObject(foldersettings.languagecode, foldersettings.catalogname, "");
+    this->searcher->summary_length := 150;
+
+    IF (foldersettings.restrictfolder = 0)
+      this->searcher->restrict_url := this->webdesign->targetsite->webroot;
+    ELSE
+      this->searcher->restrict_url := OpenWHFSObject(foldersettings.restrictfolder)->url;
+
+    RECORD result := this->DoSearch(this->webdesign, GetWebVariable("words"));
+
+    INTEGER nr_results := result.totalcount;
+    IF (nr_results > maxresults)
+      nr_results := maxresults;
+
+    STRING resultsstr;
+    IF (nr_results = 0)
+      resultsstr := "Er zijn geen resultaten gevonden. Probeer het eens met een andere zoekterm.";
+    ELSE IF (nr_results = 1)
+      resultsstr := "Er is 1 resultaat gevonden.";
+    ELSE
+      resultsstr := `Er zijn ${nr_results} resultaten gevonden.`;
+
+    RECORD wittydata :=
+        CELL[ resultsstr
+            , result.results
+            , words := GetWebVariable("words")
+            ];
+
+    RETURN PTR LoadWittyLibrary(Resolve("search.witty"),"HTML-NI")->RunComponent("searchresults", wittydata);
+  }
+
+  STRING FUNCTION HighlightSearchWords(STRING text, STRING highlightstart, STRING highlightend)
+  {
+    text := Substitute(text, "\x1D", highlightstart);
+    text := Substitute(text, "\x1C", highlightend);
+
+    RETURN text;
+  }
+
+  RECORD FUNCTION DoSearch(OBJECT webdesign, STRING words)
+  {
+    RECORD result := this->searcher->Search(words, 0, maxresults);
+
+    result.results :=
+        SELECT title
+             , description := this->HighlightSearchWords(CellExists(results,"summary")?summary:_summary,'<span class="match">','</span>')
+             , link := objectid
+             , id := ToInteger(groupid,0)
+          FROM result.results;
+
+    FOREVERY(RECORD item FROM result.results)
+      result.results[#item].title := SELECT AS STRING (title ?? name) FROM system.fs_objects WHERE id = item.id;
+
+    RETURN result;
+  }
+>;
