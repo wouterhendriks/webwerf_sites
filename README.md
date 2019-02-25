@@ -32,7 +32,7 @@ You'll need to set your own body renderer and apply site profile.
     <bodyrenderer library="news.whlib" objectname="newspage" />
   </apply>
 
-  <applysiteprofile fullpath="mod::webwerf_sites/pages/news/news.siteprl" />
+  <applysiteprofile path="mod::webwerf_sites/pages/news/news.siteprl" />
 </siteprofile>
 ```
 
@@ -73,7 +73,7 @@ Settings: title + link. Adds an anchor with class "button".
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/button" />
 
-<applysiteprofile fullpath="mod::webwerf_sites/embeddedobjects/button/button.siteprl" />
+<applysiteprofile path="mod::webwerf_sites/embeddedobjects/button/button.siteprl" />
 ```
 
 ## Full width image
@@ -81,7 +81,7 @@ Settings: title + link. Adds an anchor with class "button".
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/fullwidthimage" />
 
-<applysiteprofile fullpath="mod::webwerf_sites/embeddedobjects/fullwidthimage/fullwidthimage.siteprl" />
+<applysiteprofile path="mod::webwerf_sites/embeddedobjects/fullwidthimage/fullwidthimage.siteprl" />
 ```
 
 CSS:
@@ -94,7 +94,7 @@ CSS:
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/quote" />
 
-<applysiteprofile fullpath="mod::webwerf_sites/embeddedobjects/quote/quote.siteprl" />
+<applysiteprofile path="mod::webwerf_sites/embeddedobjects/quote/quote.siteprl" />
 ```
 
 CSS:
@@ -107,7 +107,7 @@ CSS:
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/textimagecols" />
 
-<applysiteprofile fullpath="mod::webwerf_sites/embeddedobjects/textimagecols/textimagecols.siteprl" />
+<applysiteprofile path="mod::webwerf_sites/embeddedobjects/textimagecols/textimagecols.siteprl" />
 ```
 
 CSS:
@@ -121,7 +121,7 @@ CSS:
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/twocolumnstext" />
 
-<applysiteprofile fullpath="mod::webwerf_sites/embeddedobjects/twocolumnstext/twocolumnstext.siteprl" />
+<applysiteprofile path="mod::webwerf_sites/embeddedobjects/twocolumnstext/twocolumnstext.siteprl" />
 ```
 
 CSS:
@@ -167,7 +167,7 @@ function onResizeWithCookieBar() {
 ## Siteprofile
 
 ```
-  <applysiteprofile fullpath="mod::webwerf_sites/components/cookiebar/cookiebar.siteprl" />
+  <applysiteprofile path="mod::webwerf_sites/components/cookiebar/cookiebar.siteprl" />
 ```
 
 ## WHLIB
