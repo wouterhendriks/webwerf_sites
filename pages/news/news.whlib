@@ -8,10 +8,16 @@ PUBLIC STATIC OBJECTTYPE WWNewsAPI
 <
   PUBLIC OBJECT newsfolder;
 
+  MACRO NEW(OBJECT newsfolder DEFAULTSTO DEFAULT OBJECT)
+  {
+    IF (ObjectExists(newsfolder))
+      this->newsfolder := newsfolder;
+  }
+
   PUBLIC RECORD ARRAY FUNCTION GetNewsItems(INTEGER limitnum)
   {
     IF (NOT ObjectExists(this->newsfolder))
-      THROW NEW Exception("Set newsfolder first");
+      THROW NEW Exception("Set newsfolder first (directly or in NEW)");
 
     OBJECT rtdtype := OpenWHFSType("http://www.webhare.net/xmlns/publisher/richdocumentfile");
 
