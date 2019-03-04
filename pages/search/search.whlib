@@ -67,7 +67,7 @@ PUBLIC OBJECTTYPE SearchPage EXTEND WebPageBase
     RECORD result := this->searcher->Search(words, 0, maxresults);
 
     result.results :=
-        SELECT title
+        SELECT title := CellExists(results, "title") ? title : ""
              , description := this->HighlightSearchWords(CellExists(results,"summary")?summary:_summary,'<span class="match">','</span>')
              , link := objectid
              , id := ToInteger(groupid,0)
