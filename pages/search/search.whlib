@@ -19,6 +19,15 @@ PUBLIC OBJECTTYPE SearchPage EXTEND WebPageBase
 
   UPDATE PUBLIC MACRO PTR FUNCTION GetPageBody()
   {
+    RECORD options;
+    IF (MemberExists(this->webdesign, "GetSearchPageSettings"))
+      options := this->webdesign->GetSearchPageSettings();
+
+    options := ValidateOptions(
+      [ wittylib := Resolve("search.witty")
+      , wittycomponent := "searchresults"
+      ], options);
+
     INSERT "page-search" INTO this->webdesign->htmlclasses AT END;
 
     RECORD foldersettings := this->webdesign->targetfolder->GetInstanceData("http://sites.webwerf.nl/foldertype/search");
@@ -51,7 +60,7 @@ PUBLIC OBJECTTYPE SearchPage EXTEND WebPageBase
             , words := GetWebVariable("words")
             ];
 
-    RETURN PTR LoadWittyLibrary(Resolve("search.witty"),"HTML-NI")->RunComponent("searchresults", wittydata);
+    RETURN PTR LoadWittyLibrary(options.wittylib,"HTML-NI")->RunComponent(options.wittycomponent, wittydata);
   }
 
   STRING FUNCTION HighlightSearchWords(STRING text, STRING highlightstart, STRING highlightend)
