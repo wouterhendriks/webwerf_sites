@@ -1,0 +1,99 @@
+<?wh
+
+LOADLIB "wh::datetime.whlib";
+
+LOADLIB "mod::system/lib/database.whlib";
+LOADLIB "mod::system/lib/whfs.whlib";
+
+
+PUBLIC STATIC OBJECTTYPE WWAgendaAPI
+<
+  OBJECT agendafolder;
+
+  MACRO NEW(OBJECT agendafolder)
+  {
+    IF (NOT ObjectExists(agendafolder) OR agendafolder->typens != "http://sites.webwerf.nl/foldertype/agenda")
+      THROW NEW Exception(`Missing agenda folder`);
+
+    STRING foldertype := "http://sites.webwerf.nl/foldertype/agenda";
+    IF (agendafolder->typens != foldertype)
+      THROW NEW Exception(`Invalid type for agenda, should be ${foldertype}, was ${agendafolder->typens}`);
+
+    this->agendafolder := agendafolder;
+  }
+
+  PUBLIC RECORD ARRAY FUNCTION GetAgendaItems(RECORD options)
+  {
+    options := ValidateOptions([ limitnum := 999999
+                               ], options);
+
+    OBJECT rtdtype := OpenWHFSType("http://www.webhare.net/xmlns/publisher/richdocumentfile");
+
+    RECORD ARRAY agenda :=
+         SELECT id
+              , title
+              , ordering
+              , link := indexurl
+           FROM system.fs_objects
+          WHERE parent = this->agendafolder->id
+                AND type = rtdtype->id
+                AND title != ""
+                AND indexurl != "";
+
+    OBJECT agendatype := OpenWHFSType("http://sites.webwerf.nl/filetype/agendaitem");
+
+    RECORD agendafoldersettings := this->agendafolder->GetInstanceData("http://sites.webwerf.nl/foldertype/agenda");
+
+    INTEGER now_dc := GetDayCount(UTCToLocal(GetCurrentDateTime(),"CET"));
+
+    RECORD ARRAY items :=
+        SELECT *
+             , date_formatted := this->FormatAgendaTime(date, date_until, "nl")
+          FROM agendatype->Enrich(agenda, "id", [ "image","date","date_until","summary" ])
+         WHERE (date_until = DEFAULT DATETIME ? GetDayCount(date) >= now_dc : GetDayCount(date_until) >= now_dc)
+      ORDER BY date, date_until, id
+         LIMIT options.limitnum;
+
+    RETURN items;
+  }
+
+  STRING FUNCTION FormatAgendaTime(DATETIME dt, DATETIME dt_until, STRING lang)
+  {
+    RECORD up_now := UnpackDateTime(GetCurrentDateTime());
+    RECORD up_dt := UnpackDateTime(dt);
+    RECORD up_dt_until := UnpackDateTime(dt_until);
+
+    // no 'until' time
+    IF (dt_until = DEFAULT DATETIME)
+    {
+      IF (GetMSecondCount(dt) = 0)
+        RETURN FormatDateTime("%#d %B %Y", dt, lang);
+      ELSE
+        RETURN FormatDateTime("%#d %B %Y" || ", %H:%M uur", dt, lang);
+    }
+
+    // we have an 'until' time
+    IF (up_dt.month = up_dt_until.month AND up_dt.year = up_dt_until.year) // same month
+    {
+      IF (up_dt.dayofmonth = up_dt_until.dayofmonth) // even same day
+      {
+        INTEGER dt_mins := up_dt.hour * 60 + up_dt.minute;
+        INTEGER dt_until_mins := up_dt_until.hour * 60 + up_dt_until.minute;
+
+        // both start and end times 00:00? that's probably meant as 'whole day'
+        IF (dt_mins = 0 AND dt_until_mins = 0)
+          RETURN FormatDateTime("%#d %B %Y", dt, lang);
+
+        // same time? probably meant as 'one' time
+        IF (dt_mins = dt_until_mins)
+          RETURN FormatDateTime("%#d %B %Y, %H:%M uur", dt, lang);
+
+        RETURN FormatDateTime("%#d %B %Y, %H:%M", dt, lang) || " - "
+            || FormatDateTime("%H:%M uur", dt_until, lang);
+      }
+
+      RETURN FormatDateTime("%#d", dt) || " - " || FormatDateTime("%#d %B %Y", dt_until, lang);
+    }
+
+    RETURN FormatDateTime("%#d %B %Y", dt, lang) || " - " || FormatDateTime("%#d %B %Y", dt_until, lang);
+  }>;

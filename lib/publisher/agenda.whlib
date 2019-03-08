@@ -1,0 +1,13 @@
+<?wh
+
+LOADLIB "mod::tollium/lib/screenbase.whlib";
+
+
+PUBLIC STATIC OBJECTTYPE AgendaItem EXTEND TolliumTabsExtensionBase
+<
+  UPDATE PUBLIC MACRO SubmitExtension(OBJECT work)
+  {
+    IF (^date_until->value != DEFAULT DATETIME AND ^date_until->value < ^date->value)
+      work->AddErrorFor(^date_until, "De einddatum ligt vóór de begindatum.");
+  }
+>;

@@ -5,26 +5,121 @@
 
   <!-- ***********************************************************************
 
-      Agenda folder
+       News folder
 
   ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/foldertype/agenda" />
 
-  <contenttype namespace="http://sites.webwerf.nl/foldertype/agenda">
-    <member name="addthis_add" type="boolean" />
-    <member name="addthis_js_code" type="string" />
-    <member name="set_date" type="boolean" />
-    <member name="date_required" type="boolean" />
-    <member name="no_dates" type="boolean" />
-    <member name="own_image" type="boolean" />
-    <member name="own_image_whfstype" type="string" />
-    <member name="own_image_whfsmember" type="string" />
+  <foldertype typedef="http://sites.webwerf.nl/foldertype/agenda"
+              tolliumicon="tollium:folders/agenda"
+              tid=".foldertype"
+              protectindexfile="true"
+              />
+
+  <apply>
+    <to type="all" parenttype="http://sites.webwerf.nl/foldertype/agenda" />
+    <denyfiletype typedef="*" />
+    <denyfoldertype typedef="*" />
+    <allowfiletype typedef="http://www.webhare.net/xmlns/publisher/richdocumentfile" />
+  </apply>
+
+  <apply>
+    <to type="folder" foldertype="http://sites.webwerf.nl/foldertype/agenda" />
+    <folderindex indexfile="newfile"
+                 newfiletype="http://sites.webwerf.nl/filetype/agendaindex"
+                 newfilename="index.rtd"
+                 protectindexfile="true"
+                 />
+  </apply>
+
+  <!-- ***********************************************************************
+
+       Agenda folder index file
+
+  ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/filetype/agendaindex" />
+
+  <filetype typedef="http://sites.webwerf.nl/filetype/agendaindex"
+            title="Nieuwsoverzicht"
+            tolliumicon="tollium:files/application_x-webhare-richdocument"
+            blobiscontent="false"
+            needstemplate="true"
+            needsprofile="false"
+            ispublishable="true"
+            requirescontent="false"
+            isacceptableindex="true"
+            ispublishedassubdir="true"
+            extensions=".rtd"
+            />
+
+  <apply>
+    <to type="file" filetype="http://sites.webwerf.nl/filetype/agendaindex" />
+    <setobjecteditor name="publisher:editdocument" />
+  </apply>
+
+  <!-- ***********************************************************************
+
+       Agenda file (RTD)
+
+  ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/filetype/agendaitem">
+    <member name="image" type="file" />
+    <member name="date" type="datetime" />
+    <member name="date_until" type="datetime" />
+    <member name="summary" type="string" />
   </contenttype>
 
+  <tabsextension name="agendaitem"
+                 xmlns="http://www.webhare.net/xmlns/tollium/screens"
+                 implementation="lib"
+                 lib="mod::webwerf_sites/lib/publisher/agenda.whlib"
+                 >
+    <newtab tid=".tab_agenda">
+      <heading tid=".heading_summary" />
+      <panel layout="left">
+        <textarea composition="contentdata" cellname="summary" width="1pr" height="5x" required="true" title="" errorlabeltid=".summary_error" placeholdertid=".placeholder_summary" name="summary" />
+      </panel>
+
+      <heading title="Datum" />
+      <panel layout="left">
+        <text title="" value="Vul 'Datum t/m' alleen in als er een begin- en einddatum is. Laat tijdstippen leeg voor volledige dagen." wordwrap="true" />
+      </panel>
+      <datetime composition="contentdata" cellname="date" type="datetime" title="Datum vanaf" required="true" name="date" />
+      <datetime composition="contentdata" cellname="date_until" type="datetime" title="Datum tot en met" name="date_until" />
+
+      <heading tid=".heading_image" />
+      <panel layout="left">
+        <imgedit composition="contentdata"
+                 cellname="image"
+                 title=""
+                 width="300px"
+                 height="200px"
+                 preserveifunchanged="true"
+                 allowedactions="all refpoint"
+                 errorlabeltid=".image_error"
+                 publisher="false"
+                 required="true"
+                 />
+      </panel>
+    </newtab>
+  </tabsextension>
 
   <apply>
     <to type="file" filetype="http://www.webhare.net/xmlns/publisher/richdocumentfile" parenttype="http://sites.webwerf.nl/foldertype/agenda" />
     <extendproperties extension=".agendaitem" contenttype="http://sites.webwerf.nl/filetype/agendaitem" />
   </apply>
 
+  <!-- ***********************************************************************
+
+       Body renderers
+
+  *********************************************************************** -->
+  <!-- BYO
+  <apply>
+    <to type="index" parenttype="http://sites.webwerf.nl/foldertype/agenda" />
+    <to type="file" filetype="http://www.webhare.net/xmlns/publisher/richdocumentfile" parenttype="http://sites.webwerf.nl/foldertype/agenda" />
+    <bodyrenderer library="agenda.whlib" objectname="agendapage" />
+  </apply>
+   -->
 
 </siteprofile>

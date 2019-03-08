@@ -68,6 +68,15 @@
   </textgroup>
   <textgroup gid="siteprofile">   <!-- siteprofile -->
     <textgroup gid="pages">   <!-- siteprofile.pages -->
+      <textgroup gid="agenda">   <!-- siteprofile.pages.agenda -->
+        <text tid="foldertype">Agenda</text>
+        <text tid="heading_image">Afbeelding (overzicht)</text>
+        <text tid="heading_summary">Samenvatting (introductietekst in overzicht)</text>
+        <text tid="image_error">Afbeelding (tabblad 'Agenda-item')</text>
+        <text tid="placeholder_summary">Samenvatting van het agenda-item voor in het overzicht</text>
+        <text tid="summary_error">Samenvatting (tabblad 'Agenda-item')</text>
+        <text tid="tab_agenda">Agenda-item</text>
+      </textgroup>
       <textgroup gid="news">   <!-- siteprofile.pages.news -->
         <text tid="addthis_hint">Vul hieronder de AddThis JavaScript URL in, deze lijkt op //s7.addthis.com/js/300/addthis_widget.js#pubid=ra-592d281ab96ac0a8.<br/><br/>Voor meer info, zie https://sites.nubium.nl/webhare-info/contentbeheerders/.</text>
         <text tid="foldertype">Nieuws</text>
