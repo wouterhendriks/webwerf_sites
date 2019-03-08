@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             gid="siteprofile.pages.agenda"
+             >
+
+  <!-- ***********************************************************************
+
+      Agenda folder
+
+  ***********************************************************************  -->
+
+  <contenttype namespace="http://sites.webwerf.nl/foldertype/agenda">
+    <member name="addthis_add" type="boolean" />
+    <member name="addthis_js_code" type="string" />
+    <member name="set_date" type="boolean" />
+    <member name="date_required" type="boolean" />
+    <member name="no_dates" type="boolean" />
+    <member name="own_image" type="boolean" />
+    <member name="own_image_whfstype" type="string" />
+    <member name="own_image_whfsmember" type="string" />
+  </contenttype>
+
+
+  <apply>
+    <to type="file" filetype="http://www.webhare.net/xmlns/publisher/richdocumentfile" parenttype="http://sites.webwerf.nl/foldertype/agenda" />
+    <extendproperties extension=".agendaitem" contenttype="http://sites.webwerf.nl/filetype/agendaitem" />
+  </apply>
+
+
+</siteprofile>
