@@ -2,7 +2,13 @@
   <div class="p-search">
     <h1 class="p-search__heading">Zoeken</h1>
     <form class="p-form" method="get" action="">
-      <input type="text" value="[words]" name="words" class="p-form__forminput">
+      <div class="wh-form__fieldgroup wh-form__fieldgroup--textedit">
+        <div class="wh-form__fields">
+          <div class="wh-form__fieldline">
+            <input value="[words]" name="words" class="wh-form__textinput">
+          </div>
+        </div>
+      </div>
       <button type="submit" class="button p-form__formsearchbutton">Zoeken</button>
     </form>
     <div class="p-search__resulttitle">
