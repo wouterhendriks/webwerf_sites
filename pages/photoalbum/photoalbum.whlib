@@ -1,0 +1,102 @@
+<?wh
+LOADLIB "wh::witty.whlib";
+LOADLIB "mod::publisher/lib/webdesign.whlib";
+LOADLIB "mod::system/lib/cache.whlib";
+LOADLIB "mod::system/lib/database.whlib";
+LOADLIB "mod::system/lib/whfs.whlib";
+LOADLIB "mod::nope/lib/siteapi.whlib";
+
+PUBLIC OBJECTTYPE PhotosPage EXTEND StaticPageBase
+<
+  RECORD wittydata;
+
+  UPDATE PUBLIC MACRO PrepareForRendering(OBJECT webdesign)
+  {
+    INSERT "page-nope-photoalbum" INTO webdesign->htmlclasses AT END;
+
+    OBJECT videotype := OpenWHFSType("http://sites.webwerf.nl/filetype/photoalbum-video");
+
+    RECORD ARRAY items :=
+         SELECT id
+              , title
+              , description
+              , link := indexurl
+              , isphoto := type = 12
+              , videolink := ""
+              , image := DEFAULT RECORD
+              , thumb := DEFAULT RECORD
+           FROM system.fs_objects
+          WHERE parent = webdesign->targetfolder->id
+                AND type IN [12 /* image */, videotype->id ]
+                AND indexurl != ""
+       ORDER BY ordering, ToUpperCase(title), id;
+
+    FOREVERY (RECORD item FROM items)
+    {
+      RECORD image;
+      IF (item.isphoto)
+      {
+        image := OpenWHFSObject(item.id)->GetWrapped();
+      }
+      ELSE
+      {
+        RECORD videodata := videotype->GetInstanceData(item.id);
+        image := videodata.video.thumbnail;
+
+        items[#item].videolink := GetVideoLink(videodata.video);
+      }
+
+      items[#item].image := WrapCachedImage(image, [ method := "fit", setwidth := 1920, format := "image/jpeg" ]);
+      items[#item].thumb := WrapCachedImage(image, [ method := "fill", setwidth := 700, setheight := 700, format := "image/jpeg" ]);
+    }
+
+    IF (Length(SELECT FROM items WHERE videolink != "") > 0)
+      webdesign->InsertWithCallback(PTR this->AddVimeoPlayerAPI(), "dependencies-top");
+
+    this->wittydata :=
+        CELL[ items
+            , rtd := PTR webdesign->OpenRTDFromFile(webdesign->targetobject)->RenderAllObjects()
+            ];
+  }
+
+  MACRO AddVimeoPlayerAPI()
+  {
+    Print('<script src="https://f.vimeocdn.com/js/froogaloop2.min.js"></script>');
+  }
+
+  UPDATE PUBLIC MACRO RunBody(OBJECT webdesign)
+  {
+    LoadWittyLibrary(Resolve("photoalbum.witty"), "HTML-NI")->RunComponent("index", this->wittydata);
+  }
+>;
+
+PUBLIC OBJECTTYPE VideoPage EXTEND StaticPageBase
+<
+  PUBLIC RECORD wittydata;
+
+  UPDATE PUBLIC MACRO PrepareForRendering(OBJECT webdesign)
+  {
+    RECORD videodata := webdesign->targetobject->GetInstanceData("http://sites.webwerf.nl/filetype/photoalbum-video");
+
+    this->wittydata :=
+        CELL[ videodata.video.videoid
+            , videolink := GetVideoLink(videodata.video)
+            , is_vimeo := ToUpperCase(videodata.video.network) = "VIMEO"
+            ];
+  }
+
+  UPDATE PUBLIC MACRO RunBody(OBJECT webdesign)
+  {
+    LoadWittyLibrary(Resolve("photoalbum.witty"), "HTML-NI")->RunComponent("video", this->wittydata);
+  }
+>;
+
+STRING FUNCTION GetVideoLink(RECORD videoinfo)
+{
+  IF (videoinfo.network = "youtube")
+    RETURN "https://www.youtube.com/watch?v=" || videoinfo.videoid;
+  ELSE IF (videoinfo.network = "vimeo")
+    RETURN "https://vimeo.com/" || videoinfo.videoid;
+
+  RETURN "";
+}

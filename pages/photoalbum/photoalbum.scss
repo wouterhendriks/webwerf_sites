@@ -1,0 +1,150 @@
+@import './lightgallery/sass/lightgallery';
+@import './lightgallery/sass/lg-transitions';
+
+html.page-nope-photoalbum {
+  .mfp-wrap,
+  .mfp-ready {
+    z-index: 20000;
+  }
+
+  .lg-backdrop {
+    z-index: 25000;
+  }
+
+  .lg-outer {
+    z-index: 26000;
+  }
+
+  .mfp-close {
+    background: none !important;
+  }
+
+  .mfp-image-holder .mfp-close,
+  .mfp-iframe-holder .mfp-close {
+    color: #fff !important;
+    font-weight: 400;
+  }
+}
+
+.page-nope-photoalbum {
+  &__items {
+    display: flex;
+    flex-flow: row wrap;
+    align-content: flex-start;
+  }
+
+  &__thumb-link {
+    width: calc(25% - 1px);
+    margin-right: 1px;
+    margin-bottom: 1px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+      .page-nope-photoalbum__play {
+        background: #000;
+
+        &::after {
+          border-left-color: #fff;
+        }
+      }
+
+      .page-nope-photoalbum__thumb-img {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  &__thumb-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform .3s;
+  }
+
+  img.mfp-img {
+    pointer-events: none;
+  }
+
+  &__playcontainer {
+    border: 1px solid #fff;
+    border-radius: 100%;
+    padding: 5px;
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+  }
+
+  &__play {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, .9);
+    border-radius: 100%;
+    transition: background .3s;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      border-top: 10px solid transparent;
+      border-left: 16px solid #000;
+      border-bottom: 10px solid transparent;
+      margin-left: 4px;
+      transition: border-color .3s;
+    }
+  }
+
+  &__phototitle {
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  &__photodescription {
+    font-size: 12px;
+  }
+
+  &__phototitle + &__photodescription {
+    margin-top: 5px;
+  }
+
+  // bigger than tablet, add overlay
+  @media screen and (min-width: 1025px) {
+    &__thumb-link:hover {
+      .page-nope-photoalbum__hoveroverlay {
+        opacity: .8;
+      }
+    }
+
+    &__hoveroverlay {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity .3s;
+      z-index: 10;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    &__thumb-link {
+      width: calc(33.33333% - 1px);
+    }
+  }
+
+  @media screen and (max-width: 568px) {
+    &__thumb-link {
+      width: 100%;
+    }
+  }
+}

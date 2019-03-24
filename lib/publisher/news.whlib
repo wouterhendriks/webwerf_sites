@@ -46,5 +46,8 @@ PUBLIC OBJECTTYPE NewsItem EXTEND TolliumTabsExtensionBase
 
     IF (foldersettings.set_date AND isnew)
       this->date->value := UTCToLocal(GetCurrentDateTime(), "CET");
+
+    ^imagefield->visible := NOT foldersettings.own_image;
+    ^image->required := ^imagefield->visible;
   }
 >;

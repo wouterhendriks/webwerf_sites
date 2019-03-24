@@ -15,8 +15,6 @@
     <member name="date_required" type="boolean" />
     <member name="no_dates" type="boolean" />
     <member name="own_image" type="boolean" />
-    <member name="own_image_whfstype" type="string" />
-    <member name="own_image_whfsmember" type="string" />
   </contenttype>
 
   <foldertype typedef="http://sites.webwerf.nl/foldertype/news"
@@ -32,6 +30,7 @@
       <checkbox composition="contentdata" cellname="no_dates" title="" label="Gebruik geen datums" /> <!-- FIXME: disable or remove following 2 options -->
       <checkbox composition="contentdata" cellname="set_date" title="" label="Vul bij nieuwsdatum initieel 'vandaag' in" value="true" />
       <checkbox composition="contentdata" cellname="date_required" title="" label="Het is verplicht om een nieuwsdatum in te vullen" value="true" />
+      <checkbox composition="contentdata" cellname="own_image" title="" label="Gebruik eigen afbeelding (haalt het afbeeldingsveld weg)" value="false" />
 
       <hr />
 
@@ -53,18 +52,6 @@
                     required="true"
                     />
         </panel>
-      </box>
-
-      <box composition="contentdata"
-           cellname="own_image"
-           checkbox="true"
-           enablecomponents="own_image_whfstype own_image_whfsmember"
-           title="Gebruik eigen afbeelding"
-           >
-        <textedit composition="contentdata" cellname="own_image_whfstype" name="own_image_whfstype" title="WHFS type"
-                  placeholder="http://sites.webwerf.nl/filetype/newsitem" required="true" width="1pr"
-                  />
-        <textedit composition="contentdata" cellname="own_image_whfsmember" name="own_image_whfsmember" title="Siteprof member" placeholder="image" required="true" width="1pr" />
       </box>
     </newtab>
   </tabsextension>
@@ -138,19 +125,22 @@
         <datetime composition="contentdata" cellname="date" type="date" title="" errorlabel="Nieuwsdatum" name="date" />
       </panel>
 
-      <heading tid=".heading_image" />
-      <panel layout="left">
-        <imgedit composition="contentdata"
-                 cellname="image"
-                 title=""
-                 width="300px"
-                 height="200px"
-                 preserveifunchanged="true"
-                 allowedactions="all refpoint"
-                 errorlabeltid=".image_error"
-                 publisher="false"
-                 required="true"
-                 />
+      <panel name="imagefield">
+        <heading tid=".heading_image" />
+        <panel layout="left">
+          <imgedit composition="contentdata"
+                   name="image"
+                   cellname="image"
+                   title=""
+                   width="300px"
+                   height="200px"
+                   preserveifunchanged="true"
+                   allowedactions="all refpoint"
+                   errorlabeltid=".image_error"
+                   publisher="false"
+                   required="true"
+                   />
+        </panel>
       </panel>
     </newtab>
   </tabsextension>

@@ -1,0 +1,35 @@
+[component index]
+  <div class="page-nope-photoalbum">
+    <div class="page-nope-photoalbum__rtd wh-rtd">
+      [rtd]
+    </div>
+    <div class="page-nope-photoalbum__items">
+      [forevery items]
+        <a class="page-nope-photoalbum__thumb-link [if videolink]popup-youtube video-link[/if]"
+           href="[if videolink][videolink][else][image.link][/if]"
+           [if videolink]data-poster="[image.link]"[/if]
+           title="[title]"
+           data-sub-html="[if title]<div class='page-nope-photoalbum__phototitle'>[title]</div>[/if][if description]<div class='page-nope-photoalbum__photodescription'>[description]</div>[/if]"
+           data-download-url="[link]"
+           >
+          <img class="page-nope-photoalbum__thumb-img" src="[thumb.link]" />
+          [if videolink]
+            <div class="page-nope-photoalbum__playcontainer">
+              <div class="page-nope-photoalbum__play"></div>
+            </div>
+          [/if]
+          <div class="page-nope-photoalbum__hoveroverlay" style="background-color: [image.dominantcolor]">
+          </div>
+        </a>
+      [/forevery]
+    </div>
+  </div>
+[/component]
+
+[component video]
+  [if is_vimeo]
+    <iframe src="https://player.vimeo.com/video/[videoid]" frameborder="0" allowfullscreen width="640" height="360"></iframe>
+  [else]
+    <iframe src="https://www.youtube.com/embed/[videoid]" frameborder="0" allowfullscreen width="640" height="360"></iframe>
+  [/if]
+[/component]

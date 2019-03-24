@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
+             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
+             >
+
+  <contenttype namespace="http://sites.webwerf.nl/foldertype/photoalbum"></contenttype>
+
+  <foldertype typedef="http://sites.webwerf.nl/foldertype/photoalbum"
+              title="Foto- en videoalbum"
+              tolliumicon="tollium:folders/photoalbum"
+              >
+  </foldertype>
+
+  <apply>
+    <to type="folder" foldertype="http://sites.webwerf.nl/foldertype/photoalbum" />
+    <folderindex indexfile="newfile"
+                 newfiletype="http://www.webhare.net/xmlns/publisher/richdocumentfile"
+                 newfilename="index.rtd"
+                 protectindexfile="true"
+                 />
+  </apply>
+
+  <filetype typedef="http://sites.webwerf.nl/filetype/photoalbum-video"
+            title="Video"
+            blobiscontent="false"
+            ispublishable="true"
+            tolliumicon="tollium:files/video"
+            isacceptableindex="false"
+            ispublishedassubdir="true"
+            needstemplate="true"
+            />
+
+  <contenttype namespace="http://sites.webwerf.nl/filetype/photoalbum-video">
+    <member name="video" type="instance" />
+  </contenttype>
+
+  <tabsextension name="video" xmlns="http://www.webhare.net/xmlns/tollium/screens">
+    <newtab title="Video">
+      <heading title="Video" />
+      <p:embedvideo composition="contentdata" cellname="video" title="" errorlabel="Video" required="true" />
+    </newtab>
+  </tabsextension>
+
+  <apply priority="2">
+    <to type="all" parenttype="http://sites.webwerf.nl/foldertype/photoalbum" />
+    <denyfiletype typedef="*" />
+    <denyfoldertype typedef="*" />
+    <allowfiletype typedef="http://www.webhare.net/xmlns/publisher/imagefile" />
+    <allowfiletype typedef="http://sites.webwerf.nl/filetype/photoalbum-video" />
+  </apply>
+
+  <apply priority="2">
+    <to type="index" parenttype="http://sites.webwerf.nl/foldertype/photoalbum" />
+    <bodyrenderer library="photoalbum.whlib" objectname="photospage" />
+  </apply>
+
+  <apply>
+    <to type="all" />
+    <allowfoldertype typedef="http://sites.webwerf.nl/foldertype/photoalbum" />
+  </apply>
+
+  <apply>
+    <to type="file" filetype="http://sites.webwerf.nl/filetype/photoalbum-video" />
+    <extendproperties extension=".video" contenttype="http://sites.webwerf.nl/filetype/photoalbum-video" />
+    <setobjecteditor name="publisher:propertydialog" />
+    <bodyrenderer library="photoalbum.whlib" objectname="videopage" />
+  </apply>
+
+</siteprofile>
