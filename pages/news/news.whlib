@@ -46,7 +46,7 @@ PUBLIC STATIC OBJECTTYPE WWNewsAPI
     // order by date
     RETURN SELECT *
              FROM newstype->Enrich(news, "id", [ "image","date","summary" ])
-         ORDER BY date, ordering, ToUpperCase(title), id
+         ORDER BY date DESC, ordering, ToUpperCase(title), id
             LIMIT (limitnum > 0 ? limitnum : 999999);
   }
 >;
