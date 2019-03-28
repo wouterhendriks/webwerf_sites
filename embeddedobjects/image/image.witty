@@ -1,0 +1,12 @@
+[component embeddedobject]
+  <div class="embeddedobject embeddedobject--image embeddedobject--[if isrtdpreview]preview[else]site[/if]">
+    [if isrtdpreview]
+      <img src="[image.link]" style="max-width: 100%;" />
+      <div class="embeddedobject__type">Afbeelding</div>
+    [else]
+      <p class="normal">
+        <img class="wh-rtd__img" src="[image.link]" alt="">
+      </p>
+    [/if]
+  </div>
+[/component]
