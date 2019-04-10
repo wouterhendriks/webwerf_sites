@@ -64,6 +64,12 @@ A (Consilio) search folder containing a search file. Settings can be set from th
 
 # Embedded objects
 
+To load one or more of the embedded objects, first load them:
+
+```
+<applysiteprofile path="mod::webwerf_sites/embeddedobjects/embeddedobjects.siteprl" />
+```
+
 This modules provides the following embedded objects:
 
 ## Button
@@ -73,15 +79,12 @@ Settings: title + link. Adds an anchor with class "button".
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/button" />
 
-<applysiteprofile path="mod::webwerf_sites/embeddedobjects/button/button.siteprl" />
 ```
 
 ## Full width image
 
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/fullwidthimage" />
-
-<applysiteprofile path="mod::webwerf_sites/embeddedobjects/fullwidthimage/fullwidthimage.siteprl" />
 ```
 
 CSS:
@@ -93,8 +96,6 @@ CSS:
 ## Quote
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/quote" />
-
-<applysiteprofile path="mod::webwerf_sites/embeddedobjects/quote/quote.siteprl" />
 ```
 
 CSS:
@@ -106,8 +107,6 @@ CSS:
 ## Text and image columns
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/textimagecols" />
-
-<applysiteprofile path="mod::webwerf_sites/embeddedobjects/textimagecols/textimagecols.siteprl" />
 ```
 
 CSS:
@@ -120,8 +119,6 @@ CSS:
 ## Two columns text
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/twocolumnstext" />
-
-<applysiteprofile path="mod::webwerf_sites/embeddedobjects/twocolumnstext/twocolumnstext.siteprl" />
 ```
 
 CSS:
