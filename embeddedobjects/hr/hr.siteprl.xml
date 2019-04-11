@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile">
+
+  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/hr"
+              title="Horizontale lijn"
+              wittycomponent="hr.witty:embeddedobject"
+              >
+  </widgettype>
+
+</siteprofile>

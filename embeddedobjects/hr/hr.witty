@@ -1,0 +1,12 @@
+[component embeddedobject]
+  <div class="embeddedobject embeddedobject--hr embeddedobject--[if isrtdpreview]preview[else]site[/if]">
+    [if isrtdpreview]
+      <hr />
+      <div class="embeddedobject__type">Horizontale lijn</div>
+    [else]
+      <div class="emb-hr">
+        <hr />
+      </div>
+    [/if]
+  </div>
+[/component]
