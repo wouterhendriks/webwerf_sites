@@ -28,6 +28,14 @@
 
       &__col {
         width: 100%;
+
+        &--left {
+          margin-right: 0;
+        }
+
+        &--right {
+          margin-left: 0;
+        }
       }
     }
   }
