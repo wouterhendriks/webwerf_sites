@@ -25,6 +25,8 @@ PUBLIC STATIC OBJECTTYPE WWAgendaAPI
   PUBLIC RECORD ARRAY FUNCTION GetAgendaItems(RECORD options)
   {
     options := ValidateOptions([ limitnum := 999999
+                               , dateformat := "%#d %B %Y"
+                               , languagecode := "nl"
                                ], options);
 
     OBJECT rtdtype := OpenWHFSType("http://www.webhare.net/xmlns/publisher/richdocumentfile");
@@ -48,7 +50,7 @@ PUBLIC STATIC OBJECTTYPE WWAgendaAPI
 
     RECORD ARRAY items :=
         SELECT *
-             , date_formatted := this->FormatAgendaTime(date, date_until, "nl")
+             , date_formatted := this->FormatAgendaTime(date, date_until, options)
           FROM agendatype->Enrich(agenda, "id", [ "image","date","date_until","summary" ])
          WHERE (date_until = DEFAULT DATETIME ? GetDayCount(date) >= now_dc : GetDayCount(date_until) >= now_dc)
       ORDER BY date, date_until, id
@@ -57,7 +59,7 @@ PUBLIC STATIC OBJECTTYPE WWAgendaAPI
     RETURN items;
   }
 
-  STRING FUNCTION FormatAgendaTime(DATETIME dt, DATETIME dt_until, STRING lang)
+  STRING FUNCTION FormatAgendaTime(DATETIME dt, DATETIME dt_until, RECORD options)
   {
     RECORD up_now := UnpackDateTime(GetCurrentDateTime());
     RECORD up_dt := UnpackDateTime(dt);
@@ -67,9 +69,9 @@ PUBLIC STATIC OBJECTTYPE WWAgendaAPI
     IF (dt_until = DEFAULT DATETIME)
     {
       IF (GetMSecondCount(dt) = 0)
-        RETURN FormatDateTime("%#d %B %Y", dt, lang);
+        RETURN FormatDateTime(options.dateformat, dt, options.languagecode);
       ELSE
-        RETURN FormatDateTime("%#d %B %Y" || ", %H:%M uur", dt, lang);
+        RETURN FormatDateTime(options.dateformat || ", %H:%M uur", dt, options.languagecode);
     }
 
     // we have an 'until' time
@@ -82,18 +84,18 @@ PUBLIC STATIC OBJECTTYPE WWAgendaAPI
 
         // both start and end times 00:00? that's probably meant as 'whole day'
         IF (dt_mins = 0 AND dt_until_mins = 0)
-          RETURN FormatDateTime("%#d %B %Y", dt, lang);
+          RETURN FormatDateTime(options.dateformat, dt, options.languagecode);
 
         // same time? probably meant as 'one' time
         IF (dt_mins = dt_until_mins)
-          RETURN FormatDateTime("%#d %B %Y, %H:%M uur", dt, lang);
+          RETURN FormatDateTime(`${options.dateformat}, %H:%M uur`, dt, options.languagecode);
 
-        RETURN FormatDateTime("%#d %B %Y, %H:%M", dt, lang) || " - "
-            || FormatDateTime("%H:%M uur", dt_until, lang);
+        RETURN FormatDateTime(`${options.dateformat}, %H:%M`, dt, options.languagecode) || ` - `
+            || FormatDateTime(`%H:%M uur`, dt_until, options.languagecode);
       }
 
-      RETURN FormatDateTime("%#d", dt) || " - " || FormatDateTime("%#d %B %Y", dt_until, lang);
+      RETURN FormatDateTime(`%#d`, dt) || " - " || FormatDateTime(options.dateformat, dt_until, options.languagecode);
     }
 
-    RETURN FormatDateTime("%#d %B %Y", dt, lang) || " - " || FormatDateTime("%#d %B %Y", dt_until, lang);
+    RETURN FormatDateTime(options.dateformat, dt, options.languagecode) || " - " || FormatDateTime(options.dateformat, dt_until, options.languagecode);
   }>;
