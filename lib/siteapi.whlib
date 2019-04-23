@@ -238,6 +238,7 @@ RECORD ARRAY FUNCTION __GenerateFilePath(INTEGER tofile,STRING sitename)
                             FILES.NAME AS name,
                             FILES.URL,
                             FILES.ID,
+                            ORIGINALTITLE := FILES.TITLE,
                             FILES.PARENT AS __parent,
                             FOLDERS.INDEXDOC AS __indexdoc
                      FROM system.fs_objects as files, system.fs_objects as folders
@@ -278,6 +279,7 @@ RECORD ARRAY FUNCTION __GenerateFolderPath(INTEGER tofolder, STRING sitename)
                                    AS TITLE,
                                  NAME,
                                  ID,
+                                 ORIGINALTITLE := TITLE,
                                 INDEXURL AS URL
                          FROM system.fs_objects
                          WHERE id=folderid
