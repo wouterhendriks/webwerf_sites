@@ -5,7 +5,7 @@
       <div class="wh-form__fieldgroup wh-form__fieldgroup--textedit">
         <div class="wh-form__fields">
           <div class="wh-form__fieldline">
-            <input value="[words]" name="words" class="wh-form__textinput">
+            <input type="text" value="[words]" name="words" class="wh-form__textinput">
           </div>
         </div>
       </div>
