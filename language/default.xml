@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <language xmlns="http://www.webhare.net/xmlns/tollium/screens" xml:lang="nl" xmlns:html="http://www.w3.org/1999/xhtml">
-  <textgroup gid="adhocdump">   <!-- adhocdump -->
+  <textgroup gid="adhocdump" limitlanguages="nl">   <!-- adhocdump -->
     <textgroup gid="dump">   <!-- adhocdump.dump -->
       <textgroup gid="messages">   <!-- adhocdump.dump.messages -->
         <text tid="verifydeleteresult">Verwijderde resultaten kunnen niet hersteld worden. Weet u zeker dat u dit resultaat wil verwijderen ?</text>
@@ -53,10 +53,10 @@
       <text tid="viewresults-descr">Mag resultaten exporteren</text>
     </textgroup>
   </textgroup>
-  <textgroup gid="cookiebar">   <!-- cookiebar -->
+  <textgroup gid="cookiebar" limitlanguages="nl">   <!-- cookiebar -->
     <text tid="name_descr">Kies hieronder een cookienaam. Deze dient uniek te zijn per site. <br/><br/>Advies: gebruik geen spaties en hoofdletters, en begin de naam bijv. met 'cookiebar-'. <br/><br/>De waarde van de cookie kan leeg zijn (nog geen keuze gemaakt), 'accepted' of 'declined'.</text>
   </textgroup>
-  <textgroup gid="rights">   <!-- rights -->
+  <textgroup gid="rights" limitlanguages="nl">   <!-- rights -->
     <text tid="accessrules">Toegangsregels</text>
     <text tid="adhocdump_editresults">Wijzig resultaten</text>
     <text tid="adhocdump_editresults-descr">Mag individuele resultaten wijzigen</text>
@@ -66,7 +66,7 @@
     <text tid="adhocdump_viewresults-descr">Mag data-opslag resultaten exporteren</text>
     <text tid="adhocdumps">Data-opslag dumps</text>
   </textgroup>
-  <textgroup gid="siteprofile">   <!-- siteprofile -->
+  <textgroup gid="siteprofile" limitlanguages="nl">   <!-- siteprofile -->
     <textgroup gid="pages">   <!-- siteprofile.pages -->
       <textgroup gid="agenda">   <!-- siteprofile.pages.agenda -->
         <text tid="foldertype">Agenda</text>
@@ -94,6 +94,20 @@
         <text tid="filetype">Zoeken</text>
         <text tid="foldertype">Zoeken</text>
       </textgroup>
+    </textgroup>
+  </textgroup>
+  <textgroup gid="site">
+    <textgroup gid="languages">   <!-- site.languages -->
+      <text tid="de">Duits</text>
+      <text tid="en">Engels</text>
+      <text tid="nl">Nederlands</text>
+    </textgroup>
+    <textgroup gid="search">
+      <text tid="noresultsfound">Er zijn geen resultaten gevonden. Probeer het eens met een andere zoekterm.</text>
+      <text tid="oneresultfound">Er is 1 resultaat gevonden.</text>
+      <text tid="resultsfound">Er zijn <param p="1"/> resultaten gevonden.</text>
+      <text tid="searchbutton">Zoeken</text>
+      <text tid="searchheading">Zoeken</text>
     </textgroup>
   </textgroup>
 </language>

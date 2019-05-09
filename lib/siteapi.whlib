@@ -1,5 +1,8 @@
 <?wh
 LOADLIB "wh::datetime.whlib";
+
+LOADLIB "mod::tollium/lib/gettid.whlib";
+
 LOADLIB "mod::publisher/lib/publisher.whlib";
 LOADLIB "mod::system/lib/cache.whlib";
 LOADLIB "mod::system/lib/configure.whlib";
@@ -14,6 +17,7 @@ PUBLIC OBJECTTYPE SiteAPI
   //
   // Variables
   //
+  RECORD sitesettings;
   OBJECT webdesign;
 
   PUBLIC PROPERTY ishome(IsHomePage, -);
@@ -25,6 +29,10 @@ PUBLIC OBJECTTYPE SiteAPI
   MACRO NEW(OBJECT webdesign)
   {
     this->webdesign := webdesign;
+
+    this->sitesettings := webdesign->targetsite->rootobject->GetInstanceData("http://sites.webwerf.nl/sitesettings");
+    this->webdesign->languagecode := this->sitesettings.sitelanguage ?? "nl";
+    SetTIDLanguage(this->webdesign->languagecode);
 
     IF (GetDTAPStage() != "production")
       this->webdesign->assetcachebuster := ToString(GetUnixTimestamp(GetCurrentDateTime()));
@@ -69,6 +77,45 @@ PUBLIC OBJECTTYPE SiteAPI
     RETURN SELECT *, link := url FROM path;
   }
 
+  PUBLIC RECORD ARRAY FUNCTION GetLanguageSites()
+  {
+    OBJECT parentfolder := OpenWHFSObject(this->webdesign->targetsite->rootobject->parent);
+    IF (NOT ObjectExists(parentfolder) OR parentfolder->typens != "http://sites.webwerf.nl/foldertype/languagesites")
+      RETURN DEFAULT RECORD ARRAY;
+
+    RECORD ARRAY languagesites :=
+        SELECT id
+             , title
+             , link := indexurl
+          FROM system.fs_objects
+         WHERE parent = parentfolder->id;
+
+    languagesites :=
+        SELECT *
+          FROM OpenWHFSType("http://sites.webwerf.nl/sitesettings")->Enrich(languagesites, "ID", ["addsite","sitelanguage"])
+         WHERE addsite = TRUE;
+
+    // check for unique languages
+    RECORD ARRAY grouped :=
+        SELECT sitelanguage
+             , num := Length(GroupedValues(languagesites))
+          FROM languagesites
+      GROUP BY sitelanguage;
+
+    RECORD notunique := SELECT * FROM grouped WHERE num > 1;
+    IF (RecordExists(notunique))
+      Abort('Found multiple sites in the same language:' || AnyToString(notunique,'tree'));
+
+    languagesites :=
+        SELECT *
+             , selected := this->webdesign->targetsite->id = id
+             , langcode := ToUpperCase(sitelanguage)
+             , title := this->GetSiteLanguateTitle(sitelanguage)
+          FROM languagesites;
+
+    RETURN languagesites;
+  }
+
   // ---------------------------------------------------------------------------
   //
   // Private functions
@@ -76,6 +123,18 @@ PUBLIC OBJECTTYPE SiteAPI
   BOOLEAN FUNCTION IsHomePage()
   {
     RETURN this->webdesign->targetobject->id = this->webdesign->targetsite->rootobject->indexdoc;
+  }
+
+  STRING FUNCTION GetSiteLanguateTitle(STRING lang)
+  {
+    SWITCH (ToUpperCase(lang))
+    {
+      CASE "NL" { RETURN GetTid("webwerf_sites:site.languages.nl"); }
+      CASE "DE" { RETURN GetTid("webwerf_sites:site.languages.de"); }
+      CASE "EN" { RETURN GetTid("webwerf_sites:site.languages.en"); }
+    }
+
+    RETURN "";
   }
 >;
 

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<language xmlns="http://www.webhare.net/xmlns/tollium/screens" xml:lang="en" xmlns:html="http://www.w3.org/1999/xhtml">
+  <textgroup gid="adhocdump">   <!-- adhocdump -->
+    <textgroup gid="dump">   <!-- adhocdump.dump -->
+      <textgroup gid="messages">   <!-- adhocdump.dump.messages -->
+      </textgroup>
+      <textgroup gid="overview">   <!-- adhocdump.dump.overview -->
+      </textgroup>
+    </textgroup>
+    <textgroup gid="dumpsmgr">   <!-- adhocdump.dumpsmgr -->
+      <textgroup gid="deletebyid">   <!-- adhocdump.dumpsmgr.deletebyid -->
+      </textgroup>
+      <textgroup gid="dumpprops">   <!-- adhocdump.dumpsmgr.dumpprops -->
+      </textgroup>
+      <textgroup gid="main">   <!-- adhocdump.dumpsmgr.main -->
+      </textgroup>
+      <textgroup gid="messages">   <!-- adhocdump.dumpsmgr.messages -->
+      </textgroup>
+    </textgroup>
+    <textgroup gid="rights">   <!-- adhocdump.rights -->
+    </textgroup>
+  </textgroup>
+  <textgroup gid="cookiebar">   <!-- cookiebar -->
+  </textgroup>
+  <textgroup gid="rights">   <!-- rights -->
+  </textgroup>
+  <textgroup gid="site">   <!-- site -->
+    <textgroup gid="languages">   <!-- site.languages -->
+      <text tid="de">German</text>
+      <text tid="en">English</text>
+      <text tid="nl">Dutch</text>
+    </textgroup>
+    <textgroup gid="search">   <!-- site.search -->
+      <text tid="noresultsfound">No results found, please try different search terms.</text>
+      <text tid="oneresultfound">Found 1 result.</text>
+      <text tid="resultsfound">Found <param p="1"/> results.</text>
+      <text tid="searchbutton">Search</text>
+      <text tid="searchheading">Search</text>
+    </textgroup>
+  </textgroup>
+  <textgroup gid="siteprofile">   <!-- siteprofile -->
+    <textgroup gid="pages">   <!-- siteprofile.pages -->
+      <textgroup gid="agenda">   <!-- siteprofile.pages.agenda -->
+      </textgroup>
+      <textgroup gid="news">   <!-- siteprofile.pages.news -->
+      </textgroup>
+      <textgroup gid="search">   <!-- siteprofile.pages.search -->
+      </textgroup>
+    </textgroup>
+  </textgroup>
+</language>
