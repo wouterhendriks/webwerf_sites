@@ -30,10 +30,6 @@ PUBLIC OBJECTTYPE SiteAPI
   {
     this->webdesign := webdesign;
 
-    this->sitesettings := webdesign->targetsite->rootobject->GetInstanceData("http://sites.webwerf.nl/sitesettings");
-    this->webdesign->languagecode := this->sitesettings.sitelanguage ?? "nl";
-    SetTIDLanguage(this->webdesign->languagecode);
-
     IF (GetDTAPStage() != "production")
       this->webdesign->assetcachebuster := ToString(GetUnixTimestamp(GetCurrentDateTime()));
   }
@@ -42,6 +38,13 @@ PUBLIC OBJECTTYPE SiteAPI
   //
   // Public API
   //
+  PUBLIC MACRO ApplySiteSettings()
+  {
+    this->sitesettings := this->webdesign->targetsite->rootobject->GetInstanceData("http://sites.webwerf.nl/sitesettings");
+    this->webdesign->languagecode := this->sitesettings.sitelanguage ?? "nl";
+    SetTIDLanguage(this->webdesign->languagecode);
+  }
+
   PUBLIC STRING FUNCTION GetImageCSS(RECORD image, RECORD imagesettings, BOOLEAN objectfit DEFAULTSTO FALSE)
   {
     IF (NOT RecordExists(image))
