@@ -12,6 +12,7 @@
               >
     <members>
       <member name="image" type="file" />
+      <member name="alt" type="string" />
     </members>
   </widgettype>
 
@@ -26,14 +27,15 @@
     <body>
       <imgedit composition="contentdata"
                cellname="image"
-               title=""
+               title="Afbeelding"
                width="800px"
                height="400px"
-               errorlabel="Afbeelding"
                required="true"
                allowedactions="all refpoint"
                publisher="false"
                />
+
+      <textedit composition="contentdata" cellname="alt" title="Alt-tag" width="1pr" />
     </body>
     <footer>
       <defaultformbuttons buttons="ok cancel" />

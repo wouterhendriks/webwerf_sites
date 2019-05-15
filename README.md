@@ -64,7 +64,7 @@ A (Consilio) search folder containing a search file. Settings can be set from th
 
 # Embedded objects
 
-To load one or more of the embedded objects, first load them:
+To load one or more of the embedded objects, first load the site profile:
 
 ```
 <applysiteprofile path="mod::webwerf_sites/embeddedobjects/embeddedobjects.siteprl" />

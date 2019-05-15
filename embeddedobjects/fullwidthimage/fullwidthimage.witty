@@ -5,7 +5,7 @@
       <div class="embeddedobject__type">Afbeelding over hele breedte</div>
     [else]
       <div class="emb-fullwidthimage">
-        <img class="emb-fullwidthimage__image" src="[image.link]" />
+        <img class="emb-fullwidthimage__image" src="[image.link]" [if alt]alt="[alt]"[/if] />
       </div>
     [/if]
   </div>
