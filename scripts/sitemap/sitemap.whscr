@@ -27,7 +27,7 @@ PUBLIC MACRO GenerateSiteMap()
   RECORD wittydata := [ xmlitems := xmlitems
                       ];
 
-  OBJECT wittylib := LoadWittyLibrary("moduleroot::mijnsiteonline/webdesigns/shared/witty/sitemap.witty", "XML");
+  OBJECT wittylib := LoadWittyLibrary(Resolve("sitemap.witty"), "XML");
 
   OpenFile(1);
 
