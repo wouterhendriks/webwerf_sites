@@ -179,6 +179,7 @@ OBJECTTYPE SiteMenuAPI
   PUBLIC BOOLEAN skipindexdocuments; // whether to skip index files in sub menus, default TRUE
   PUBLIC BOOLEAN skiprootfiles; // whether to skip root files (files with the site root as parent), default TRUE
   PUBLIC BOOLEAN addhome; // if TRUE, adds 'Home' as the first item in the first level (uses the root index file!), default FALSE
+  PUBLIC BOOLEAN addemptytitles; // if TRUE, adds files with empty titles (unless 'noindex' is enabled)
 
   PUBLIC RECORD ARRAY flat_items_list; // holds a flat list of all menu items
 
@@ -236,7 +237,7 @@ OBJECTTYPE SiteMenuAPI
              , menuitems := isfolder ? this->GetRecursiveMenu(id, depth + 1) : DEFAULT RECORD ARRAY
           FROM system.fs_objects AS fsobj
          WHERE parent = getparent
-               AND title != ""
+               AND (this->addemptytitles ? TRUE : title != "")
                AND (NOT this->skiprootfiles ? TRUE : depth = 0 ? isfolder : TRUE)
                AND (depth > 0 AND this->skipindexdocuments AND this->IsIndexFile(fsobj.id, fsobj.isfolder, parentfolder->indexdoc) ? FALSE : TRUE)
                AND type != 2 /* skip system folders */
@@ -244,6 +245,16 @@ OBJECTTYPE SiteMenuAPI
                AND (Length(this->skiptypeids) > 0 ? type NOT IN this->skiptypeids : TRUE)
                AND (indexonly ? isfolder AND this->IsIndexFile(fsobj.id, fsobj.isfolder, parentfolder->indexdoc) : TRUE)
       ORDER BY ordering, ToUppercase(title), id;
+
+    IF (this->addemptytitles)
+    {
+      OBJECT seotab := OpenWHFSType("http://www.webhare.net/xmlns/socialite/seotab");
+
+      items :=
+          SELECT *
+            FROM seotab->Enrich(items, "ID", ["noindex"])
+           WHERE NOT noindex;
+    }
 
     IF (depth = 0 AND this->addhome)
     {

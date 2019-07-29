@@ -3,40 +3,26 @@
              xmlns:p="http://www.webhare.net/xmlns/publisher/components"
              >
 
-  <contenttype namespace="http://sites.webwerf.nl/sitesettings">
-    <member name="addsite" type="boolean" />
-    <member name="sitelanguage" type="string" />
-  </contenttype>
+  <!-- ***********************************************************************
 
-  <tabsextension name="site"
-                 xmlns="http://www.webhare.net/xmlns/tollium/screens"
-                 >
-    <newtab title="Globale instellingen*">
-      <heading title="Taal-instellingen" />
-      <panel>
-        <select composition="contentdata" cellname="sitelanguage" title="Taal van de site" type="pulldown">
-          <option rowkey="nl" title="Nederlands" />
-          <option rowkey="en" title="Engels" />
-          <option rowkey="de" title="Duits" />
-        </select>
-      </panel>
-      <panel layout="left">
-        <checkbox composition="contentdata" cellname="addsite" label="Activeer deze site in het taalmenu (alleen voor sites in map van type 'Map met taalsites')" value="true" />
-      </panel>
-    </newtab>
-  </tabsextension>
+       Sitemap
+
+  ***********************************************************************  -->
+  <contenttype namespace="http://sites.webwerf.nl/filetype/sitemap" />
+  <filetype typedef="http://sites.webwerf.nl/filetype/sitemap"
+            title="Sitemap"
+            blobiscontent="false"
+            ispublishable="true"
+            tolliumicon="tollium:files/text_xml"
+            ispublishedassubdir="false"
+            needstemplate="false"
+            isacceptableindex="true"
+            extensions=".xml"
+            />
 
   <apply>
-    <to type="folder" pathmask="/" />
-    <extendproperties extension=".site" contenttype="http://sites.webwerf.nl/sitesettings" requireright="system:sysop" />
+    <to type="file" filetype="http://sites.webwerf.nl/filetype/sitemap" />
+    <usepublishtemplate script="mod::webwerf_sites/scripts/sitemap/sitemap.whscr" />
   </apply>
-
-  <contenttype namespace="http://sites.webwerf.nl/foldertype/languagesites" />
-
-  <foldertype typedef="http://sites.webwerf.nl/foldertype/languagesites"
-              title="Map met taalsites"
-              tolliumicon="tollium:folders/system"
-              >
-  </foldertype>
 
 </siteprofile>

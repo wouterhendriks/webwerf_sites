@@ -1,0 +1,37 @@
+<?wh
+LOADLIB "wh::datetime.whlib";
+LOADLIB "wh::witty.whlib";
+LOADLIB "module::publisher/siteprofiles.whlib";
+LOADLIB "module::publisher/template-v2.whlib";
+LOADLIB "mod::webwerf_sites/lib/siteapi.whlib";
+
+GenerateSiteMap();
+
+PUBLIC MACRO GenerateSiteMap()
+{
+  OBJECT webdesign := GetWebDesign(file.id);
+
+  OBJECT menuapi := GetSiteMenuAPI(webdesign);
+  menuapi->max_depth := 3;
+  menuapi->skipindexdocuments := TRUE;
+  menuapi->skiprootfiles := FALSE;
+  menuapi->addemptytitles := TRUE;
+  menuapi->Generate();
+
+  RECORD ARRAY xmlitems :=
+      SELECT modificationdate_formatted := FormatISO8601DateTime(modificationdate)
+           , link
+        FROM menuapi->flat_items_list
+       WHERE link != "";
+
+  RECORD wittydata := [ xmlitems := xmlitems
+                      ];
+
+  OBJECT wittylib := LoadWittyLibrary("moduleroot::mijnsiteonline/webdesigns/shared/witty/sitemap.witty", "XML");
+
+  OpenFile(1);
+
+  wittylib->Run(wittydata);
+}
+
+
