@@ -180,6 +180,7 @@ OBJECTTYPE SiteMenuAPI
   PUBLIC BOOLEAN skiprootfiles; // whether to skip root files (files with the site root as parent), default TRUE
   PUBLIC BOOLEAN addhome; // if TRUE, adds 'Home' as the first item in the first level (uses the root index file!), default FALSE
   PUBLIC BOOLEAN addemptytitles; // if TRUE, adds files with empty titles (unless 'noindex' is enabled)
+  PUBLIC BOOLEAN allowemptyindexurl;
 
   PUBLIC RECORD ARRAY flat_items_list; // holds a flat list of all menu items
 
@@ -241,7 +242,7 @@ OBJECTTYPE SiteMenuAPI
                AND (NOT this->skiprootfiles ? TRUE : depth = 0 ? isfolder : TRUE)
                AND (depth > 0 AND this->skipindexdocuments AND this->IsIndexFile(fsobj.id, fsobj.isfolder, parentfolder->indexdoc) ? FALSE : TRUE)
                AND type != 2 /* skip system folders */
-               AND indexurl != ""
+               AND (this->allowemptyindexurl ? TRUE : indexurl != "")
                AND (Length(this->skiptypeids) > 0 ? type NOT IN this->skiptypeids : TRUE)
                AND (indexonly ? isfolder AND this->IsIndexFile(fsobj.id, fsobj.isfolder, parentfolder->indexdoc) : TRUE)
       ORDER BY ordering, ToUppercase(title), id;

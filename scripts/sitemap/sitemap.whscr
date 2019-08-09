@@ -12,11 +12,13 @@ PUBLIC MACRO GenerateSiteMap()
   OBJECT webdesign := GetWebDesign(file.id);
 
   OBJECT menuapi := GetSiteMenuAPI(webdesign);
-  menuapi->max_depth := 3;
+  menuapi->max_depth := 5;
   menuapi->skipindexdocuments := TRUE;
   menuapi->skiprootfiles := FALSE;
   menuapi->addemptytitles := TRUE;
-  menuapi->Generate();
+  menuapi->allowemptyindexurl := TRUE;
+
+  RECORD ARRAY menu := menuapi->Generate();
 
   RECORD ARRAY xmlitems :=
       SELECT modificationdate_formatted := FormatISO8601DateTime(modificationdate)
