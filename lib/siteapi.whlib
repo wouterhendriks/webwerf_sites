@@ -119,6 +119,32 @@ PUBLIC OBJECTTYPE SiteAPI
     RETURN languagesites;
   }
 
+  // this function doesn't check on indexurl/publish
+  PUBLIC OBJECT FUNCTION GetRootObjectByType(STRING typens)
+  {
+    OBJECT whfstype := OpenWHFSType(typens);
+    IF (NOT ObjectExists(whfstype))
+      THROW NEW Exception(`Could not find WHFS type "${typens}"`);
+
+    RECORD ARRAY objects :=
+        SELECT id
+          FROM system.fs_objects
+         WHERE parent = this->webdesign->targetsite->rootobject->id
+               AND type = whfstype->id;
+
+    IF (Length(objects) = 0)
+    THROW NEW Exception(`Could not find any root object for type "${typens}"`);
+
+    IF (Length(objects) > 1)
+      THROW NEW Exception(`Multiple root objects found for type "${typens}"`);
+
+    OBJECT fsobject := OpenWHFSObject(objects[0].id);
+    IF (NOT ObjectExists(fsobject))
+      THROW NEW Exception(`Could not find root object for type "${typens}" (found id #${objects[0].id})`);
+
+    RETURN fsobject;
+  }
+
   // ---------------------------------------------------------------------------
   //
   // Private functions
