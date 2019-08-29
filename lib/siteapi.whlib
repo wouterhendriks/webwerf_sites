@@ -119,12 +119,20 @@ PUBLIC OBJECTTYPE SiteAPI
     RETURN languagesites;
   }
 
-  // this function doesn't check on indexurl/publish
-  PUBLIC OBJECT FUNCTION GetRootObjectByType(STRING typens)
+  // please note that this function doesn't check on indexurl/publish
+  // the function will throw an exception if it found multiple objects
+  PUBLIC OBJECT FUNCTION GetRootObject(RECORD options)
   {
-    OBJECT whfstype := OpenWHFSType(typens);
+    options := ValidateOptions([ type := "" // type namespace
+                               , expect := "" // "", file, folder
+                               ]
+                               , options
+                               , [ required := ["type"]
+                                 ]);
+
+    OBJECT whfstype := OpenWHFSType(options.type);
     IF (NOT ObjectExists(whfstype))
-      THROW NEW Exception(`Could not find WHFS type "${typens}"`);
+      THROW NEW Exception(`Could not find WHFS type "${options.type}"`);
 
     RECORD ARRAY objects :=
         SELECT id
@@ -133,16 +141,65 @@ PUBLIC OBJECTTYPE SiteAPI
                AND type = whfstype->id;
 
     IF (Length(objects) = 0)
-    THROW NEW Exception(`Could not find any root object for type "${typens}"`);
+      THROW NEW Exception(`Could not find any root object for type "${options.type}"`);
 
     IF (Length(objects) > 1)
-      THROW NEW Exception(`Multiple root objects found for type "${typens}"`);
+      THROW NEW Exception(`Multiple root objects found for type "${options.type}"`);
 
     OBJECT fsobject := OpenWHFSObject(objects[0].id);
     IF (NOT ObjectExists(fsobject))
-      THROW NEW Exception(`Could not find root object for type "${typens}" (found id #${objects[0].id})`);
+      THROW NEW Exception(`Could not find root object for type "${options.type}" (#${objects[0].id})`);
+
+    IF (options.expect != "")
+    {
+      // if expecting a file, it shouldn't be a folder
+      IF (options.expect = "file" AND fsobject->isfolder)
+        THROW NEW Exception(`Expected file but got folder for type "${options.type}" (#${objects[0].id})`);
+
+      // if expeciting a folder, it shouldn't be a file
+      IF (options.expect = "folder" AND NOT fsobject->isfolder)
+        THROW NEW Exception(`Expected file but got folder for type "${options.type}" (#${objects[0].id})`);
+    }
 
     RETURN fsobject;
+  }
+
+  // get files from folder
+  // orders by ordering, title, id
+  PUBLIC RECORD ARRAY FUNCTION GetSubFiles(RECORD options)
+  {
+    options := ValidateOptions([ parent := 0 // parent folder id
+                               , type := "" // type namespace
+                               , limitnum := 0
+                               , checktitle := TRUE
+                               , checkindexurl := TRUE // checks for both "publish" as well as empty URLs
+                               ]
+                               , options
+                               , [ required := ["parent"]
+                                 ]);
+
+    IF (options.parent = 0)
+      THROW NEW Exception(`"parent" must be set`);
+
+    // check for existing parent folder
+    OBJECT parentfolder := OpenWHFSObject(options.parent);
+    IF (NOT ObjectExists(parentfolder))
+      THROW NEW Exception(`Could not find WHFS object #${options.parent}`);
+
+    IF (NOT parentfolder->isfolder)
+      THROW NEW Exception(`WHFS object #${options.parent} is a file, not a folder`);
+
+    OBJECT whfstype := options.type != "" ? OpenWHFSType(options.type) : DEFAULT OBJECT;
+
+    RETURN
+         SELECT *
+           FROM system.fs_objects
+          WHERE parent = options.parent
+                AND (ObjectExists(whfstype) ? type = whfstype->id : TRUE)
+                AND (options.checktitle ? title != "" : TRUE)
+                AND (options.checkindexurl ? indexurl != "" : TRUE)
+       ORDER BY ordering, ToUpperCase(title), id
+          LIMIT (options.limitnum > 0 ? options.limitnum : 99999);
   }
 
   // ---------------------------------------------------------------------------
