@@ -125,6 +125,8 @@ PUBLIC OBJECTTYPE SiteAPI
   {
     options := ValidateOptions([ type := "" // type namespace
                                , expect := "" // "", file, folder
+                               , name := ""
+                               , requirepublished := FALSE // checks for 'publish' boolean, also checks if it's a file
                                ]
                                , options
                                , [ required := ["type"]
@@ -138,27 +140,44 @@ PUBLIC OBJECTTYPE SiteAPI
         SELECT id
           FROM system.fs_objects
          WHERE parent = this->webdesign->targetsite->rootobject->id
-               AND type = whfstype->id;
+               AND type = whfstype->id
+               AND (options.name != "" ? ToUpperCase(name) = ToUpperCase(options.name) : TRUE);
+
+    STRING errordetails := `type "${options.type}"`;
+    IF (options.name != "")
+      errordetails := errordetails || `, file name "${options.name}"`;
 
     IF (Length(objects) = 0)
-      THROW NEW Exception(`Could not find any root object for type "${options.type}"`);
+      THROW NEW Exception(`Could not find any root object for ${errordetails}`);
 
     IF (Length(objects) > 1)
-      THROW NEW Exception(`Multiple root objects found for type "${options.type}"`);
+      THROW NEW Exception(`Multiple root objects found for ${errordetails}`);
 
-    OBJECT fsobject := OpenWHFSObject(objects[0].id);
+    INTEGER objectid := objects[0].id;
+
+    OBJECT fsobject := OpenWHFSObject(objectid);
     IF (NOT ObjectExists(fsobject))
-      THROW NEW Exception(`Could not find root object for type "${options.type}" (#${objects[0].id})`);
+      THROW NEW Exception(`Could not find root object for ${errordetails} (#${objectid})`);
 
     IF (options.expect != "")
     {
       // if expecting a file, it shouldn't be a folder
       IF (options.expect = "file" AND fsobject->isfolder)
-        THROW NEW Exception(`Expected file but got folder for type "${options.type}" (#${objects[0].id})`);
+        THROW NEW Exception(`Expected file but got folder for ${errordetails} (#${objectid})`);
 
       // if expeciting a folder, it shouldn't be a file
       IF (options.expect = "folder" AND NOT fsobject->isfolder)
-        THROW NEW Exception(`Expected file but got folder for type "${options.type}" (#${objects[0].id})`);
+        THROW NEW Exception(`Expected file but got folder for ${errordetails} (#${objectid})`);
+    }
+
+    // if 'requirepublished' is set, check if it's a file and published
+    IF (options.requirepublished)
+    {
+      IF (fsobject->isfolder)
+        THROW NEW Exception(`'requirepublished' is set to TRUE, but the found object (#${objectid}) is a folder.`);
+
+       IF (NOT fsobject->publish)
+         THROW NEW Exception(`File #${objectid} should be published, but it's not.`);
     }
 
     RETURN fsobject;
@@ -171,7 +190,7 @@ PUBLIC OBJECTTYPE SiteAPI
     options := ValidateOptions([ parent := 0 // parent folder id
                                , type := "" // type namespace
                                , limitnum := 0
-                               , checktitle := TRUE
+                               , checktitle := TRUE // if TRUE, only return files with titles
                                , checkindexurl := TRUE // checks for both "publish" as well as empty URLs
                                ]
                                , options
