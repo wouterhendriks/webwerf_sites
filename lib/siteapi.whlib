@@ -19,6 +19,7 @@ PUBLIC OBJECTTYPE SiteAPI
   //
   RECORD sitesettings;
   OBJECT webdesign;
+  STRING dtapstage;
 
   PUBLIC PROPERTY ishome(IsHomePage, -);
 
@@ -29,8 +30,9 @@ PUBLIC OBJECTTYPE SiteAPI
   MACRO NEW(OBJECT webdesign)
   {
     this->webdesign := webdesign;
+    this->dtapstage := GetDTAPStage();
 
-    IF (GetDTAPStage() != "production")
+    IF (this->dtapstage != "production")
       this->webdesign->assetcachebuster := ToString(GetUnixTimestamp(GetCurrentDateTime()));
   }
 
@@ -221,6 +223,23 @@ PUBLIC OBJECTTYPE SiteAPI
           LIMIT (options.limitnum > 0 ? options.limitnum : 99999);
   }
 
+  PUBLIC MACRO AddGTMCode(STRING gtmcode, RECORD options DEFAULTSTO DEFAULT RECORD)
+  {
+    options := ValidateOptions([ productionserver_only := TRUE ], options);
+
+    IF (options.productionserver_only AND this->dtapstage != "production")
+      RETURN;
+
+    IF (gtmcode = "" OR ToUpperCase(gtmcode) NOT LIKE "GTM-*")
+    {
+      this->webdesign->AddPublicationWarning(`De GTM-code ('${gtmcode}') lijkt niet te kloppen.`);
+      RETURN;
+    }
+
+    this->webdesign->InsertWithCallback(PTR this->AddGTMHead(gtmcode), "dependencies-top");
+    this->webdesign->InsertWithCallback(PTR this->AddGTMBody(gtmcode), "body-top");
+  }
+
   // ---------------------------------------------------------------------------
   //
   // Private functions
@@ -240,6 +259,16 @@ PUBLIC OBJECTTYPE SiteAPI
     }
 
     RETURN "";
+  }
+
+  MACRO AddGTMHead(STRING gtm_code)
+  {
+    Print("<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" || EncodeJava(gtm_code)|| "');</script>");
+  }
+
+  MACRO AddGTMBody(STRING gtm_code)
+  {
+    Print('<noscript><iframe src="//www.googletagmanager.com/ns.html?id=' || EncodeURL(gtm_code) || '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
   }
 >;
 
