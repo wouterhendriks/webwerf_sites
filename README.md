@@ -2,7 +2,7 @@
 
 ```
 # Clone the repo
-git clone git@gitlab.com:webwerf/webwerf_sites.git "$(wh getdatadir)installedmodules/webwerf_sites"
+git clone git@github.com:wouterhendriks/webwerf_sites.git "$(wh getdatadir)installedmodules/webwerf_sites"
 
 # Make sure WebHare knows about this module
 wh softreset
