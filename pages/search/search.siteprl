@@ -13,6 +13,7 @@
     <member name="catalogname" type="string" />
     <member name="languagecode" type="string" />
     <member name="restrictfolder" type="whfsref" />
+    <member name="iscustomindex" type="boolean" />
   </contenttype>
 
   <foldertype typedef="http://sites.webwerf.nl/foldertype/search"
@@ -37,6 +38,9 @@
                            acceptfolders="true"
                            />
         <text value="(bij niet invullen wordt de site gebruikt)" />
+      </line>
+      <line layout="left">
+        <checkbox composition="contentdata" cellname="iscustomindex" label="Dit is een custom index (geen restrictfolder)" title="" />
       </line>
     </newtab>
   </tabsextension>

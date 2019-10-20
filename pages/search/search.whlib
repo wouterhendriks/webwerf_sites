@@ -18,6 +18,7 @@ INTEGER maxresults := 25;
 PUBLIC OBJECTTYPE SearchPage EXTEND WebPageBase
 <
   OBJECT searcher;
+  RECORD foldersettings;
 
   UPDATE PUBLIC MACRO PTR FUNCTION GetPageBody()
   {
@@ -28,19 +29,23 @@ PUBLIC OBJECTTYPE SearchPage EXTEND WebPageBase
     options := ValidateOptions(
       [ wittylib := Resolve("search.witty")
       , wittycomponent := "searchresults"
+      , enrichresults := DEFAULT FUNCTION PTR
       ], options);
 
     INSERT "page-search" INTO this->webdesign->htmlclasses AT END;
 
-    RECORD foldersettings := this->webdesign->targetfolder->GetInstanceData("http://sites.webwerf.nl/foldertype/search");
+    this->foldersettings := this->webdesign->targetfolder->GetInstanceData("http://sites.webwerf.nl/foldertype/search");
 
-    this->searcher := OpenSearchObject(foldersettings.languagecode, foldersettings.catalogname, "");
+    this->searcher := OpenSearchObject(this->foldersettings.languagecode, this->foldersettings.catalogname, "");
     this->searcher->summary_length := 150;
 
-    IF (foldersettings.restrictfolder = 0)
-      this->searcher->restrict_url := this->webdesign->targetsite->webroot;
-    ELSE
-      this->searcher->restrict_url := OpenWHFSObject(foldersettings.restrictfolder)->url;
+    IF (NOT this->foldersettings.iscustomindex)
+    {
+      IF (this->foldersettings.restrictfolder = 0)
+        this->searcher->restrict_url := this->webdesign->targetsite->webroot;
+      ELSE
+        this->searcher->restrict_url := OpenWHFSObject(this->foldersettings.restrictfolder)->url;
+    }
 
     RECORD result := this->DoSearch(this->webdesign, GetWebVariable("words"));
 
@@ -56,9 +61,13 @@ PUBLIC OBJECTTYPE SearchPage EXTEND WebPageBase
     ELSE
       resultsstr := GetTid("webwerf_sites:site.search.resultsfound", ToString(nr_results));
 
+    RECORD ARRAY results := result.results;
+    IF (NOT IsDefaultValue(options.enrichresults))
+      results := options.enrichresults(results);
+
     RECORD wittydata :=
         CELL[ resultsstr
-            , result.results
+            , results
             , words := GetWebVariable("words")
             ];
 
@@ -84,8 +93,11 @@ PUBLIC OBJECTTYPE SearchPage EXTEND WebPageBase
              , id := ToInteger(groupid,0)
           FROM result.results;
 
-    FOREVERY(RECORD item FROM result.results)
-      result.results[#item].title := SELECT AS STRING (title ?? name) FROM system.fs_objects WHERE id = item.id;
+    IF (NOT this->foldersettings.iscustomindex)
+    {
+      FOREVERY(RECORD item FROM result.results)
+        result.results[#item].title := SELECT AS STRING (title ?? name) FROM system.fs_objects WHERE id = item.id;
+    }
 
     RETURN result;
   }
