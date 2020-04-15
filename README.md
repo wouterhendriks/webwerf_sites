@@ -70,7 +70,7 @@ To load one or more of the embedded objects, first load the site profile:
 <applysiteprofile path="mod::webwerf_sites/embeddedobjects/embeddedobjects.siteprl" />
 ```
 
-This modules provides the following embedded objects:
+This module provides the following embedded objects:
 
 ## Button
 
@@ -96,12 +96,6 @@ CSS:
 ## Quote
 ```
 <allowtype type="http://sites.webwerf.nl/embeddedobjects/quote" />
-```
-
-CSS:
-
-```
-@import '~@mod-webwerf_sites/embeddedobjects/quote/quote';
 ```
 
 ## Text and image columns

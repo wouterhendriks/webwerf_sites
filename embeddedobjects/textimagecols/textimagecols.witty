@@ -12,7 +12,7 @@
             </div>
           </div>
           <div class="emb-textimagecols__col emb-textimagecols__col--image">
-            <img class="emb-textimagecols__image" src="[image.link]" />
+            <img class="emb-textimagecols__image" src="[image.link]" [if alt]alt="[alt]"[/if] />
           </div>
         </div>
       </div>

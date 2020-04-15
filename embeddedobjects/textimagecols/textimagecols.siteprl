@@ -29,6 +29,7 @@
     <members>
       <member name="richtext" type="richdocument" />
       <member name="image" type="file" />
+      <member name="alt" type="string" />
       <member name="mirror" type="boolean" />
     </members>
   </widgettype>
@@ -77,6 +78,7 @@
                    allowedactions="all refpoint"
                    publisher="false"
                    />
+          <textedit composition="contentdata" cellname="alt" title="Alt-tag" width="1pr" />
         </tab>
       </tabs>
     </body>
