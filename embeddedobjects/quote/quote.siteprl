@@ -1,15 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
-             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
-             >
+<?xml version="1.0" encoding="UTF-8"?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile">
 
-  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/quote"
-              editscreen=".quote"
+  <widgettype editextension="#quote"
+              namespace="http://sites.webwerf.nl/embeddedobjects/quote"
               renderlibrary="quote.whlib"
               renderobjectname="quote"
-              wittycomponent="quote.witty:embeddedobject"
               title="Quote"
-              >
+              wittycomponent="quote.witty:embeddedobject">
     <members>
       <member name="quote_text" type="string" />
       <member name="quote_from_name" type="string" />
@@ -17,24 +14,13 @@
     </members>
   </widgettype>
 
-  <screen name="quote"
-          xmlns="http://www.webhare.net/xmlns/tollium/screens"
-          implementation="p:widgetedit"
-          title="Bewerk quote"
-          minwidth="600px"
-          >
-    <compositions>
-      <record name="contentdata" />
-    </compositions>
-    <body>
+  <tabsextension xmlns="http://www.webhare.net/xmlns/tollium/screens" name="quote">
+    <newtab>
       <heading title="Instellingen" />
-      <textarea composition="contentdata" cellname="quote_text" title="Quote-tekst" width="1pr" height="4x" required="true" />
-      <textedit composition="contentdata" cellname="quote_from_name" title="Quote van (naam)" width="1pr" required="true" />
-      <textedit composition="contentdata" cellname="quote_from_position" title="Quote van (functie)" width="1pr" />
-    </body>
-    <footer>
-      <defaultformbuttons buttons="ok cancel" />
-    </footer>
-  </screen>
+      <textarea composition="contentdata" cellname="quote_text" width="1pr" height="4x" required="true" title="Quote-tekst" />
+      <textedit composition="contentdata" cellname="quote_from_name" width="1pr" required="true" title="Quote van (naam)" />
+      <textedit composition="contentdata" cellname="quote_from_position" width="1pr" title="Quote van (functie)" />
+    </newtab>
+  </tabsextension>
 
 </siteprofile>

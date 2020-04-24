@@ -1,45 +1,30 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
-             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
-             >
+<?xml version="1.0" encoding="UTF-8"?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile">
 
-  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/fullwidthimage"
-              editscreen=".fullwidthimage"
+  <widgettype editextension="#fullwidthimage"
+              namespace="http://sites.webwerf.nl/embeddedobjects/fullwidthimage"
               renderlibrary="fullwidthimage.whlib"
               renderobjectname="fullwidthimage"
-              wittycomponent="fullwidthimage.witty:embeddedobject"
               title="Afbeelding over hele breedte"
-              >
+              wittycomponent="fullwidthimage.witty:embeddedobject">
     <members>
       <member name="image" type="file" />
       <member name="alt" type="string" />
     </members>
   </widgettype>
 
-  <screen name="fullwidthimage"
-          xmlns="http://www.webhare.net/xmlns/tollium/screens"
-          implementation="p:widgetedit"
-          title="Bewerk afbeelding"
-          >
-    <compositions>
-      <record name="contentdata" />
-    </compositions>
-    <body>
+  <tabsextension xmlns="http://www.webhare.net/xmlns/tollium/screens" name="fullwidthimage">
+    <newtab>
       <imgedit composition="contentdata"
                cellname="image"
-               title="Afbeelding"
                width="800px"
                height="400px"
-               required="true"
                allowedactions="all refpoint"
                publisher="false"
-               />
-
-      <textedit composition="contentdata" cellname="alt" title="Alt-tag" width="1pr" />
-    </body>
-    <footer>
-      <defaultformbuttons buttons="ok cancel" />
-    </footer>
-  </screen>
+               required="true"
+               title="Afbeelding" />
+      <textedit composition="contentdata" cellname="alt" width="1pr" title="Alt-tag" />
+    </newtab>
+  </tabsextension>
 
 </siteprofile>

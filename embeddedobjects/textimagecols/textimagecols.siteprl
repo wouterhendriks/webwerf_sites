@@ -1,16 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
-             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
-             >
+<?xml version="1.0" encoding="UTF-8"?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile">
 
   <rtdtype namespace="http://sites.webwerf.nl/embeddedobjects/rtd/textimagecols">
     <blockstyles defaultstyle="NORMAL">
-      <textstyle tag="HEADING1" containertag="h1" textstyles="" />
-      <textstyle tag="HEADING2" containertag="h2" textstyles="" />
-      <textstyle tag="HEADING3" containertag="h3" textstyles="" />
+      <textstyle containertag="h1" tag="HEADING1" textstyles="" />
+      <textstyle containertag="h2" tag="HEADING2" textstyles="" />
+      <textstyle containertag="h3" tag="HEADING3" textstyles="" />
       <textstyle tag="NORMAL" textstyles="b i a-href img sup sub strike" />
-      <textstyle tag="UNORDERED" containertag="ul" textstyles="b i a-href sup sub strike" />
-      <textstyle tag="ORDERED" containertag="ol" textstyles="b i a-href sup sub strike" />
+      <textstyle containertag="ul" tag="UNORDERED" textstyles="b i a-href sup sub strike" />
+      <textstyle containertag="ol" tag="ORDERED" textstyles="b i a-href sup sub strike" />
       <tablestyle tag="TABLE" />
     </blockstyles>
     <widgets>
@@ -19,13 +17,12 @@
     </widgets>
   </rtdtype>
 
-  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/textimagecols"
-              editscreen=".text_image_cols"
+  <widgettype editextension="#text_image_cols"
+              namespace="http://sites.webwerf.nl/embeddedobjects/textimagecols"
               renderlibrary="textimagecols.whlib"
               renderobjectname="textimagecols"
-              wittycomponent="textimagecols.witty:embeddedobject"
               title="Tekst en afbeelding"
-              >
+              wittycomponent="textimagecols.witty:embeddedobject">
     <members>
       <member name="richtext" type="richdocument" />
       <member name="image" type="file" />
@@ -34,57 +31,42 @@
     </members>
   </widgettype>
 
-  <screen name="text_image_cols"
-          xmlns="http://www.webhare.net/xmlns/tollium/screens"
-          implementation="p:widgetedit"
-          minwidth="700px"
-          minheight="500px"
-          allowresize="true"
-          savestate="size"
-          title="Bewerk tekst en afbeelding"
-          >
-    <compositions>
-      <record name="contentdata" />
-    </compositions>
-    <body spacers="none">
+  <tabsextension xmlns="http://www.webhare.net/xmlns/tollium/screens"
+                 name="text_image_cols"
+                 allowresize="true">
+    <newtab spacers="none">
       <tabs height="1pr">
         <tab title="Tekst">
           <heading title="Instellingen" />
           <panel layout="left">
-            <checkbox composition="contentdata" cellname="mirror" title="" label="Toon foto aan de linkerkant" />
+            <checkbox composition="contentdata" cellname="mirror" label="Toon foto aan de linkerkant" title="" />
           </panel>
           <hr />
-
-          <panel layout="left" height="1pr">
+          <panel height="1pr" layout="left">
             <heading title="Tekst" />
             <richdocument composition="contentdata"
                           cellname="richtext"
                           height="1pr"
-                          required="true"
                           errorlabel="Tekst"
-                          rtdtype="http://sites.webwerf.nl/embeddedobjects/rtd/textimagecols"
-                          />
+                          required="true"
+                          rtdtype="http://sites.webwerf.nl/embeddedobjects/rtd/textimagecols" />
           </panel>
         </tab>
-        <tab title="Foto" layout="left">
+        <tab layout="left" title="Foto">
           <heading title="Foto" />
           <imgedit composition="contentdata"
                    cellname="image"
-                   title=""
                    width="500px"
                    height="300px"
-                   errorlabel="Foto"
-                   required="true"
                    allowedactions="all refpoint"
+                   errorlabel="Foto"
                    publisher="false"
-                   />
-          <textedit composition="contentdata" cellname="alt" title="Alt-tag" width="1pr" />
+                   required="true"
+                   title="" />
+          <textedit composition="contentdata" cellname="alt" width="1pr" title="Alt-tag" />
         </tab>
       </tabs>
-    </body>
-    <footer>
-      <defaultformbuttons buttons="ok cancel" />
-    </footer>
-  </screen>
+    </newtab>
+  </tabsextension>
 
 </siteprofile>

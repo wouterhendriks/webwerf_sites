@@ -1,7 +1,9 @@
 ﻿<?wh
 LOADLIB "mod::system/lib/database.whlib";
-LOADLIB "mod::system/lib/adhocdump.whlib";
 LOADLIB "mod::system/lib/resources.whlib";
+
+LOADLIB "mod::webwerf_sites/lib/adhocdump.whlib";
+
 
 /*
 RECORD args := ParseArguments(GetConsoleArguments(),

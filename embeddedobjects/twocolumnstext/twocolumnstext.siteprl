@@ -1,16 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
-             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
-             >
+<?xml version="1.0" encoding="UTF-8"?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile">
 
   <rtdtype namespace="http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext">
     <blockstyles defaultstyle="NORMAL">
-      <textstyle tag="HEADING1" containertag="h1" textstyles="" />
-      <textstyle tag="HEADING2" containertag="h2" textstyles="" />
-      <textstyle tag="HEADING3" containertag="h3" textstyles="" />
+      <textstyle containertag="h1" tag="HEADING1" textstyles="" />
+      <textstyle containertag="h2" tag="HEADING2" textstyles="" />
+      <textstyle containertag="h3" tag="HEADING3" textstyles="" />
       <textstyle tag="NORMAL" textstyles="b i a-href img sup sub strike" />
-      <textstyle tag="UNORDERED" containertag="ul" textstyles="b i a-href sup sub strike" />
-      <textstyle tag="ORDERED" containertag="ol" textstyles="b i a-href sup sub strike" />
+      <textstyle containertag="ul" tag="UNORDERED" textstyles="b i a-href sup sub strike" />
+      <textstyle containertag="ol" tag="ORDERED" textstyles="b i a-href sup sub strike" />
       <tablestyle tag="TABLE" />
     </blockstyles>
     <widgets>
@@ -19,41 +17,30 @@
     </widgets>
   </rtdtype>
 
-  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/twocolumnstext"
-              editscreen=".twocolumnstext"
+  <widgettype editextension="#twocolumnstext"
+              namespace="http://sites.webwerf.nl/embeddedobjects/twocolumnstext"
               renderlibrary="twocolumnstext.whlib"
               renderobjectname="twocolumnstext"
-              wittycomponent="twocolumnstext.witty:embeddedobject"
               title="Twee-koloms-tekst"
-              >
+              wittycomponent="twocolumnstext.witty:embeddedobject">
     <members>
       <member name="rtd_left" type="richdocument" />
       <member name="rtd_right" type="richdocument" />
     </members>
   </widgettype>
 
-  <screen name="twocolumnstext"
-          xmlns="http://www.webhare.net/xmlns/tollium/screens"
-          implementation="p:widgetedit"
-          minwidth="500px"
-          minheight="450px"
-          allowresize="true"
-          savestate="size"
-          title="Bewerk twee-koloms-tekst"
-          >
-    <compositions>
-      <record name="contentdata" />
-    </compositions>
-    <body spacers="none">
+  <tabsextension xmlns="http://www.webhare.net/xmlns/tollium/screens"
+                 name="twocolumnstext"
+                 allowresize="true">
+    <newtab spacers="none">
       <tabs height="1pr">
         <tab title="Tekst (links)">
-          <panel layout="left" height="1pr">
+          <panel height="1pr" layout="left">
             <richdocument composition="contentdata"
                           cellname="rtd_left"
                           height="1pr"
                           errorlabel="Tekst (links)"
-                          rtdtype="http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext"
-                          />
+                          rtdtype="http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext" />
           </panel>
         </tab>
         <tab title="Tekst (rechts)">
@@ -61,14 +48,10 @@
                         cellname="rtd_right"
                         height="1pr"
                         errorlabel="Tekst (rechts)"
-                        rtdtype="http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext"
-                        />
+                        rtdtype="http://sites.webwerf.nl/embeddedobjects/rtd/twocolumnstext" />
         </tab>
       </tabs>
-    </body>
-    <footer>
-      <defaultformbuttons buttons="ok cancel" />
-    </footer>
-  </screen>
+    </newtab>
+  </tabsextension>
 
 </siteprofile>

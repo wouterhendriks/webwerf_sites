@@ -1,43 +1,29 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
-             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
-             >
+<?xml version="1.0" encoding="UTF-8"?>
+<siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile">
 
-  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/image"
-              editscreen=".image"
+  <widgettype editextension="#image"
+              namespace="http://sites.webwerf.nl/embeddedobjects/image"
               renderlibrary="image.whlib"
               renderobjectname="image"
-              wittycomponent="image.witty:embeddedobject"
               title="Afbeelding"
-              >
+              wittycomponent="image.witty:embeddedobject">
     <members>
       <member name="image" type="file" />
     </members>
   </widgettype>
 
-  <screen name="image"
-          xmlns="http://www.webhare.net/xmlns/tollium/screens"
-          implementation="p:widgetedit"
-          title="Bewerk afbeelding"
-          >
-    <compositions>
-      <record name="contentdata" />
-    </compositions>
-    <body>
+  <tabsextension xmlns="http://www.webhare.net/xmlns/tollium/screens" name="image">
+    <newtab>
       <imgedit composition="contentdata"
                cellname="image"
-               title=""
                width="800px"
                height="400px"
-               errorlabel="Afbeelding"
-               required="true"
                allowedactions="all refpoint"
+               errorlabel="Afbeelding"
                publisher="false"
-               />
-    </body>
-    <footer>
-      <defaultformbuttons buttons="ok cancel" />
-    </footer>
-  </screen>
+               required="true"
+               title="" />
+    </newtab>
+  </tabsextension>
 
 </siteprofile>

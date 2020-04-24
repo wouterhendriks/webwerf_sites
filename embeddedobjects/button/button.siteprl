@@ -1,36 +1,24 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile"
-             xmlns:p="http://www.webhare.net/xmlns/publisher/components"
-             >
+             xmlns:p="http://www.webhare.net/xmlns/publisher/components">
 
-  <widgettype namespace="http://sites.webwerf.nl/embeddedobjects/button"
-              editscreen=".button"
+  <widgettype editextension="#button"
+              namespace="http://sites.webwerf.nl/embeddedobjects/button"
               renderlibrary="button.whlib"
               renderobjectname="button"
-              wittycomponent="button.witty:embeddedobject"
               title="Knop"
-              >
+              wittycomponent="button.witty:embeddedobject">
     <members>
       <member name="title" type="string" />
       <member name="link" type="intextlink" />
     </members>
   </widgettype>
 
-  <screen name="button"
-          xmlns="http://www.webhare.net/xmlns/tollium/screens"
-          implementation="p:widgetedit"
-          title="Bewerk knop"
-          >
-    <compositions>
-      <record name="contentdata" />
-    </compositions>
-    <body>
-      <textedit composition="contentdata" cellname="title" title="Titel" width="1pr" required="true" />
-      <p:intextlink composition="contentdata" cellname="link" title="Link" width="1pr" required="true" />
-    </body>
-    <footer>
-      <defaultformbuttons buttons="ok cancel" />
-    </footer>
-  </screen>
+  <tabsextension xmlns="http://www.webhare.net/xmlns/tollium/screens" name="button">
+    <newtab>
+      <textedit composition="contentdata" cellname="title" width="1pr" required="true" title="Titel" />
+      <p:intextlink composition="contentdata" cellname="link" width="1pr" required="true" title="Link" />
+    </newtab>
+  </tabsextension>
 
 </siteprofile>
