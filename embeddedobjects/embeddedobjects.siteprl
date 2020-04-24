@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <siteprofile xmlns="http://www.webhare.net/xmlns/publisher/siteprofile">
 
-  <applysiteprofile fullpath="button/button.siteprl" />
-  <applysiteprofile fullpath="fullwidthimage/fullwidthimage.siteprl" />
-  <applysiteprofile fullpath="hr/hr.siteprl.xml" />
-  <applysiteprofile fullpath="image/image.siteprl" />
-  <applysiteprofile fullpath="quote/quote.siteprl" />
-  <applysiteprofile fullpath="textimagecols/textimagecols.siteprl" />
-  <applysiteprofile fullpath="twocolumnstext/twocolumnstext.siteprl" />
+  <applysiteprofile path="button/button.siteprl" />
+  <applysiteprofile path="fullwidthimage/fullwidthimage.siteprl" />
+  <applysiteprofile path="hr/hr.siteprl.xml" />
+  <applysiteprofile path="image/image.siteprl" />
+  <applysiteprofile path="quote/quote.siteprl" />
+  <applysiteprofile path="textimagecols/textimagecols.siteprl" />
+  <applysiteprofile path="twocolumnstext/twocolumnstext.siteprl" />
 
 </siteprofile>

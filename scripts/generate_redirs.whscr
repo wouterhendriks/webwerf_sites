@@ -6,8 +6,6 @@ LOADLIB "wh::ooxml/spreadsheet.whlib";
 
 LOADLIB "mod::system/lib/database.whlib";
 
-LOADLIB "mod::wrd/lib/api.whlib";
-
 RECORD args := ParseArguments(GetConsoleArguments(), [[ name := "path", type := "param" ],[ name := "desturl", type := "param" ]]);
 
 IF (NOT RecordExists(args)

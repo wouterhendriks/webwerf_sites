@@ -1,8 +1,8 @@
 <?wh
 LOADLIB "wh::datetime.whlib";
 LOADLIB "wh::witty.whlib";
-LOADLIB "module::publisher/siteprofiles.whlib";
-LOADLIB "module::publisher/template-v2.whlib";
+LOADLIB "mod::publisher/lib/siteprofiles.whlib";
+LOADLIB "mod::publisher/lib/template-v2.whlib";
 LOADLIB "mod::webwerf_sites/lib/siteapi.whlib";
 
 GenerateSiteMap();

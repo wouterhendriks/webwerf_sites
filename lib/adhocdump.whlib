@@ -5,7 +5,6 @@ LOADLIB "wh::float.whlib";
 LOADLIB "wh::filetypes/archiving.whlib";
 LOADLIB "wh::filetypes/csv.whlib";
 LOADLIB "wh::money.whlib";
-LOADLIB "mod::system/lib/database.whlib";
 LOADLIB "mod::system/lib/internal/rightsmgmt.whlib";
 LOADLIB "mod::system/lib/internal/typecoder.whlib";
 LOADLIB "mod::tollium/lib/commondialogs.whlib";

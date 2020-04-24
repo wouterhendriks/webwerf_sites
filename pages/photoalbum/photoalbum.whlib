@@ -4,7 +4,6 @@ LOADLIB "mod::publisher/lib/webdesign.whlib";
 LOADLIB "mod::system/lib/cache.whlib";
 LOADLIB "mod::system/lib/database.whlib";
 LOADLIB "mod::system/lib/whfs.whlib";
-LOADLIB "mod::nope/lib/siteapi.whlib";
 
 PUBLIC OBJECTTYPE PhotosPage EXTEND StaticPageBase
 <

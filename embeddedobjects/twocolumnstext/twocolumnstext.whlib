@@ -1,5 +1,5 @@
 <?wh
-LOADLIB "module::publisher/widgets.whlib";
+LOADLIB "mod::publisher/lib/widgets.whlib";
 
 PUBLIC OBJECTTYPE TwoColumnsText EXTEND WidgetBase
 <
