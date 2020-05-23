@@ -213,3 +213,34 @@ For normal sites, the CSS should be fine for the most part. But if you have an a
   }
 }
 ```
+
+# Web APIs
+
+## Moneybird
+
+Example:
+
+```
+<?wh
+
+LOADLIB "mod::system/lib/configure.whlib";
+
+LOADLIB "mod::webwerf_sites/lib/webapis/moneybird.whlib";
+
+
+STATIC OBJECTTYPE MoneyBirdAPI EXTEND WebwerfMoneyBirdAPI
+<
+  MACRO NEW()
+  {
+    this->Setup([ clientregistrykey := "wvuaw.moneybird.oauth_client"
+                , tokenregistrykey := "wvuaw.moneybird.oauth_auth"
+                , administrationid := ReadRegistryKey("wvuaw.moneybird.administrationid")
+                ]);
+  }
+>;
+
+PUBLIC OBJECT FUNCTION GetMoneyBirdAPI()
+{
+  RETURN NEW MoneyBirdAPI();
+}
+```

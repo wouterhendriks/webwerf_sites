@@ -3,31 +3,21 @@
 LOADLIB "mod::webwerf_sites/lib/internal/webapi.whlib";
 
 
-CONSTANT STRING restapiurl := "https://moneybird.com/api/v2/";
-
-PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI
+PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI EXTEND WebwerfWebAPI
 <
-  OBJECT webapi;
   STRING administrationid;
 
   /// enable/disable browser debug boolean
-  PUBLIC PROPERTY debug(this->webapi->browser->debug, this->webapi->browser->debug);
+  PUBLIC PROPERTY debug(this->browser->debug, this->browser->debug);
 
-  MACRO NEW(RECORD options)
+  PUBLIC MACRO Setup(RECORD options)
   {
-    options := ValidateOptions([ clientregistrykey := ""
-                               , tokenregistrykey := ""
-                               , administrationid := ""
-                               ], options
-                               , [ required := ["clientregistrykey","tokenregistrykey","administrationid"] ]
-                               );
+    this->SetMode("oauth2", CELL[ options.clientregistrykey
+                                , options.tokenregistrykey
+                                , restapiurl := "https://moneybird.com/api/v2/"
+                                ]);
 
     this->administrationid := options.administrationid;
-
-    this->webapi := NEW WebwerfWebAPI("oauth2", CELL[ options.clientregistrykey
-                                                    , options.tokenregistrykey
-                                                    , restapiurl
-                                                    ]);
   }
 
   /** Lists all administrations the current user has access to.
@@ -38,7 +28,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI
   */
   PUBLIC RECORD ARRAY FUNCTION ListAdministrations()
   {
-    RECORD ARRAY administrations := this->Request("GET", "administrations", [ add_administrationid_to_call := FALSE ]);
+    RECORD request := this->Request("GET", "/administrations", [ add_administrationid_to_call := FALSE ]);
 
     RETURN EnforceStructure([[ country := ""
                              , currency := ""
@@ -46,7 +36,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI
                              , language := ""
                              , name := ""
                              , time_zone := ""
-                             ]], administrations);
+                             ]], request.response);
   }
 
   /** Searching for contacts can be done by providing the query parameter with search terms.
@@ -65,30 +55,32 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI
     IF (options.query != "")
       requestoptions := CellInsert(requestoptions, "urlvariables", [ query := options.query ]);
 
-    RECORD ARRAY contacts := this->Request("GET", "/contacts", requestoptions);
+    RECORD request := this->Request("GET", "/contacts", requestoptions);
+    IF (NOT request.success)
+      RETURN RECORD[];
 
-    RETURN EnforceStructure([[ company_name := ""
-                             , chamber_of_commerce := ""
-                             , id := ""
-                             , customer_id := ""
-                             , email := ""
-                             , firstname := ""
-                             , lastname := ""
-                             ]], contacts);
+    request.response := EnforceStructure([[ company_name := ""
+                                          , chamber_of_commerce := ""
+                                          , id := ""
+                                          , customer_id := ""
+                                          , email := ""
+                                          , firstname := ""
+                                          , lastname := ""
+                                          ]], request.response);
+
+    RETURN request.response;
   }
 
   PUBLIC RECORD FUNCTION GetContact(STRING id)
   {
-    RETURN this->Request("GET", `/contacts/${id}`, [ wrapresponse := TRUE ]);
+    RETURN this->Request("GET", `/contacts/${id}`, DEFAULT RECORD);
   }
 
   PUBLIC RECORD FUNCTION CreateSalesInvoice(RECORD data)
   {
-    //RECORD
-    //data := ValidateOptions([ contact_id := 0 ]);
     RECORD request := this->Request("POST", "sales_invoices",
       [ data :=
-        [ sales_invoice := [ contact_id := "289267213416793829"
+        [ sales_invoice := [ contact_id := "289267213416793829x"
                            , details_attributes := [[ description := "Rocking Chair"
                                                    , price := "129.95"
                                                    ]]
@@ -105,16 +97,14 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI
       @param endpoint Endpoint URL, eg /sales_invoices
       @cell options.add_administrationid_to_call If TRUE, adds administration id to endpoint, defaults to TRUE - should only be FALSE for /administrations/
       @cell options.data Data record (body/attributes) to pass
-      @cell options.wrapresponse If true, accept non-200 responses and wrap the returned body to return the response
       @cell options.urlvariables Variables to add to the query, eg 'query'
 
       @return Call result, either a RECORD or RECORD ARRAY, depending on endpoint
   */
-  PUBLIC VARIANT FUNCTION Request(STRING method, STRING endpoint, RECORD options DEFAULTSTO DEFAULT RECORD)
+  PUBLIC UPDATE RECORD FUNCTION Request(STRING method, STRING endpoint, RECORD options DEFAULTSTO DEFAULT RECORD)
   {
     options := ValidateOptions([ add_administrationid_to_call := TRUE
                                , data := DEFAULT RECORD
-                               , wrapresponse := FALSE
                                , urlvariables := DEFAULT RECORD
                                ], options);
 
@@ -131,6 +121,17 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI
 
     options := CellDelete(options, "add_administrationid_to_call");
 
-    RETURN this->webapi->Request(method, endpoint, options);
+    RETURN WebwerfWebAPI::Request(method, endpoint, options);
+  }
+
+  PUBLIC UPDATE RECORD ARRAY FUNCTION CheckForErrors(VARIANT response, INTEGER httpstatuscode)
+  {
+    RECORD ARRAY errors;
+    IF (CellExists(response, "error"))
+      INSERT [ error := response.error ] INTO errors AT END;
+    ELSE IF (httpstatuscode != 200)
+      INSERT [ error := `Invalid status code: ${httpstatuscode}` ] INTO errors AT END;
+
+    RETURN errors;
   }
 >;

@@ -9,23 +9,28 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
 <
   PUBLIC OBJECT browser;
 
-  /// sets the mode with optional settings, options: oauth2
+  /// sets the mode with optional settings, options for mode: oauth2
   PUBLIC PROPERTY mode(pvt_mode, SetMode);
 
   OBJECT oauth2;
   STRING restapiurl;
   STRING pvt_mode;
 
-  MACRO NEW(STRING mode, RECORD options)
+  PUBLIC RECORD FUNCTION Request(STRING method, STRING endpoint, RECORD options DEFAULTSTO DEFAULT RECORD)
   {
-    this->SetMode(mode, options);
-  }
+    IF (this->pvt_mode = "")
+      Abort("Cannot make a request until SetMode is called");
 
-  PUBLIC VARIANT FUNCTION Request(STRING method, STRING endpoint, RECORD options DEFAULTSTO DEFAULT RECORD)
-  {
+    RECORD result := [ statustext := ""
+                     , statuscode := 0
+                     , success := FALSE
+                     , errors := RECORD[]
+                     // , response := DEFAULT VARIANT // RECORD or RECORD ARRAY
+                     ];
+
     options := ValidateOptions([ data := DEFAULT RECORD
                                , urlvariables := DEFAULT RECORD
-                               , wrapresponse := FALSE
+                               , jsontranslations := DEFAULT RECORD
                                , add_slash_in_front := TRUE
                                ], options);
 
@@ -41,24 +46,29 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
 
     BLOB body := RecordExists(options.data) ? EncodeJSONBlob(options.data) : DEFAULT BLOB;
 
-    IF(NOT this->oauth2->browser->SendRawRequest(method, url, RECORD[], body) AND NOT options.wrapresponse)
-      this->ThrowLastRequest();
+    BOOLEAN requestsuccess := this->oauth2->browser->SendRawRequest(method, url, RECORD[], body);
 
-    IF(options.wrapresponse)
-      RETURN [ statustext := this->oauth2->browser->GetHTTPStatusText()
-             , status := this->oauth2->browser->GetHTTPStatusCode()
-             , response := DecodeJSONBlob(this->oauth2->browser->content)
-             ];
+    result.statustext := this->oauth2->browser->GetHTTPStatusText();
+    result.statuscode := this->oauth2->browser->GetHTTPStatusCode();
 
-    VARIANT result := DecodeJSONBlob(this->oauth2->browser->content);
+    VARIANT requestresult := DecodeJSONBlob(this->oauth2->browser->content, options.jsontranslations);
+    IF (TypeId(requestresult) = TypeID(VARIANT ARRAY))
+      requestresult := RECORD[];
 
-    IF (TypeId(result) = TypeID(VARIANT ARRAY))
-      result := RECORD[];
+    result.errors := this->CheckForErrors(requestresult, result.statuscode);
+    result.success := Length(result.errors) = 0;
+
+    INSERT CELL response := requestresult INTO result;
 
     RETURN result;
   }
 
-  MACRO SetMode(STRING mode, RECORD options)
+  PUBLIC RECORD ARRAY FUNCTION CheckForErrors(VARIANT response, INTEGER httpstatuscode)
+  {
+    Abort("You must UPDATE the CheckForErrors function. It should return a RECORD ARRAY of errors with at least a cell 'error' containing the error message (if any). Params in this function: VARIANT response, INTEGER httpstatuscode");
+  }
+
+  PUBLIC MACRO SetMode(STRING mode, RECORD options)
   {
     this->pvt_mode := mode;
 
