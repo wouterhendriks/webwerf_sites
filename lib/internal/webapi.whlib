@@ -1,7 +1,11 @@
 <?wh
 
-LOADLIB "wh::internet/urls.whlib";
+LOADLIB "wh::files.whlib";
 
+LOADLIB "wh::internet/urls.whlib";
+LOADLIB "wh::internet/webbrowser.whlib";
+
+LOADLIB "mod::system/lib/mailer.whlib";
 LOADLIB "mod::system/lib/webapi/oauth2.whlib";
 
 
@@ -12,9 +16,17 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
   /// sets the mode with optional settings, options for mode: oauth2
   PUBLIC PROPERTY mode(pvt_mode, SetMode);
 
+  /// if set, this email is used if a (relatively normal) error occurs
+  PUBLIC PROPERTY errormail(pvt_errormail, SetErrorMail);
+
+  /// if set, this email is used if an exception occurs
+  PUBLIC PROPERTY panicmail(pvt_panicmail, SetPanicMail);
+
   OBJECT oauth2;
   STRING restapiurl;
   STRING pvt_mode;
+  STRING pvt_errormail;
+  STRING pvt_panicmail;
 
   PUBLIC RECORD FUNCTION Request(STRING method, STRING endpoint, RECORD options DEFAULTSTO DEFAULT RECORD)
   {
@@ -32,6 +44,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
                                , urlvariables := DEFAULT RECORD
                                , jsontranslations := DEFAULT RECORD
                                , add_slash_in_front := TRUE
+                               , headers := RECORD[]
                                ], options);
 
     IF (options.add_slash_in_front AND Left(endpoint, 1) != "/")
@@ -46,12 +59,12 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
 
     BLOB body := RecordExists(options.data) ? EncodeJSONBlob(options.data) : DEFAULT BLOB;
 
-    BOOLEAN requestsuccess := this->oauth2->browser->SendRawRequest(method, url, RECORD[], body);
+    BOOLEAN requestsuccess := this->browser->SendRawRequest(method, url, options.headers, body);
 
-    result.statustext := this->oauth2->browser->GetHTTPStatusText();
-    result.statuscode := this->oauth2->browser->GetHTTPStatusCode();
+    result.statustext := this->browser->GetHTTPStatusText();
+    result.statuscode := this->browser->GetHTTPStatusCode();
 
-    VARIANT requestresult := DecodeJSONBlob(this->oauth2->browser->content, options.jsontranslations);
+    VARIANT requestresult := DecodeJSONBlob(this->browser->content, options.jsontranslations);
     IF (TypeId(requestresult) = TypeID(VARIANT ARRAY))
       requestresult := RECORD[];
 
@@ -59,6 +72,9 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
     result.success := Length(result.errors) = 0;
 
     INSERT CELL response := requestresult INTO result;
+
+    IF (Length(result.errors) > 0 AND this->pvt_errormail != "")
+      this->SendErrorMail(this->pvt_errormail, result);
 
     RETURN result;
   }
@@ -89,15 +105,59 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
         this->browser := this->oauth2->browser;
         this->restapiurl := options.restapiurl;
       }
+      CASE "rest"
+      {
+        options := ValidateOptions([ restapiurl := ""
+                                   ], options
+                                   , [ required := ["restapiurl"] ]
+                                   );
+
+        this->browser := NEW WebBrowser;
+        this->restapiurl := options.restapiurl;
+      }
       DEFAULT
       {
         THROW NEW Exception(`Unknown mode "${mode}"`);
       }
     }
+
+    //IF(IsRPCTrafficLogged("system:webapi.mailchimp"))
+    //  LogRPCForWebBrowser("system:webapi.mailchimp", "", this->browser);
   }
 
   MACRO ThrowLastRequest()
   {
-    THROW NEW Exception(`${this->oauth2->browser->href}: ${this->oauth2->browser->GetHTTPStatusText()}`);
+    STRING err := `${this->oauth2->browser->href}: ${this->oauth2->browser->GetHTTPStatusText()}`;
+
+    IF (this->pvt_panicmail != "")
+      this->SendErrorMail(this->pvt_panicmail, err);
+
+    THROW NEW Exception(err);
+  }
+
+  MACRO SendErrorMail(STRING email, VARIANT message)
+  {
+    STRING msg := `${AnyToString(message,'htmltree')}<hr><br>${AnyToString(GetStackTrace(),'htmltree')}`;
+    OBJECT mail := MakeEmailComposer();
+    mail->mailto := [ STRING(this->panicmail) ];
+    mail->subject := `WebAPI error for ${this->pvt_mode}`;
+    mail->SetRichBody(StringToBlob(msg), "text/html");
+    mail->QueueMail();
+  }
+
+  MACRO SetErrorMail(STRING email)
+  {
+    IF (NOT IsValidEmailAddress(email))
+      THROW NEW Exception(`Invalid email "${email}"`);
+
+    this->pvt_errormail := email;
+  }
+
+  MACRO SetPanicMail(STRING email)
+  {
+    IF (NOT IsValidEmailAddress(email))
+      THROW NEW Exception(`Invalid email "${email}"`);
+
+    this->pvt_panicmail := email;
   }
 >;

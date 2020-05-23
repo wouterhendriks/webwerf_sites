@@ -1,0 +1,126 @@
+<?wh
+
+LOADLIB "mod::system/lib/mailer.whlib";
+
+LOADLIB "mod::webwerf_sites/lib/internal/webapi.whlib";
+
+
+PUBLIC STATIC OBJECTTYPE WebwerfActiveCampaignAPI EXTEND WebwerfWebAPI
+<
+  STRING apikey;
+  STRING accountname;
+
+  /// enable/disable browser debug boolean
+  PUBLIC PROPERTY debug(this->browser->debug, this->browser->debug);
+
+  /** @param options.accountname Account name, eg kodea1589723333 (part before .activehosted.com)
+      @param options.apikey API key, get it from https://<accountname>.activehosted.com/app/settings/developer
+  */
+  PUBLIC MACRO Setup(RECORD options)
+  {
+    this->accountname := options.accountname;
+    IF(this->accountname = "")
+      THROW NEW Exception("No accountname set");
+
+    this->apikey := options.apikey;
+    IF(this->apikey = "")
+      THROW NEW Exception("No API key set");
+
+    this->SetMode("rest", CELL[ restapiurl := `https://${this->accountname}.api-us1.com/api/3/`
+                              ]);
+  }
+
+  /** List contacts: https://developers.activecampaign.com/reference#list-all-contacts
+
+      @return Contacts
+  */
+  PUBLIC RECORD ARRAY FUNCTION ListAllContacts()
+  {
+    RECORD call := this->Request("GET","contacts?status=-1&orders%5Bemail%5D=ASC");
+
+    RETURN EnforceStructure([[ created_utc_timestamp := DEFAULT DATETIME
+                             , email := ""
+                             , firstname := ""
+                             , lastname := ""
+                             , phone := ""
+                             ]], call.response.contacts);
+  }
+
+  /** Creates a new contact or updates an existing one if the contact already exists (based on email): https://developers.activecampaign.com/reference#create-contact-sync
+
+      @param contactdata Record containing contact data, at least email
+      @return Result record, @see ReturnCallResult.
+      @cell(string) return.id New or updated id of contact
+  */
+  PUBLIC RECORD FUNCTION CreateOrUpdateContact(RECORD contactdata)
+  {
+    contactdata := ValidateOptions([ email := ""
+                                   , firstName := ""
+                                   , lastName := ""
+                                   , phone := ""
+                                   ]
+                                 , contactdata
+                                 , [ required := ["email"]
+                                   ]);
+
+    IF (NOT IsValidEmailAddress(contactdata.email))
+      THROW NEW Exception(`Invalid email address '${contactdata.email}'`);
+
+    RECORD jsonbody := [ contact := contactdata ];
+
+    RECORD callresult := this->Request("POST","contact/sync"
+                                  , CELL[ data := jsonbody
+                                        ]);
+
+    RETURN [ ...callresult
+           , id := CellExists(callresult.response, "contact") ? callresult.response.contact.id : ""
+           ];
+  }
+
+  /** Delete a contact: https://developers.activecampaign.com/reference#delete-contact
+
+      @param contactid Contact id
+      @return Result record, @see ReturnCallResult
+  */
+  PUBLIC RECORD FUNCTION DeleteContact(INTEGER contactid)
+  {
+    RECORD callresult := this->Request("DELETE", `contacts/${contactid}`, CELL[ wrapresponse := TRUE ]);
+    RETURN callresult;//this->ReturnCallResult(callresult);
+  }
+
+  /** Do a lowlevel call straight to the api
+
+      @param method GET, POST, PUT, etc
+      @param endpoint Endpoint URL, eg contact/sync
+      @cell options.data Data record (body/attributes) to pass
+      @cell options.urlvariables Variables to add to the query, eg 'query'
+
+      @return Call result, either a RECORD or RECORD ARRAY, depending on endpoint
+  */
+  PUBLIC UPDATE RECORD FUNCTION Request(STRING method, STRING endpoint, RECORD options DEFAULTSTO DEFAULT RECORD)
+  {
+    options := ValidateOptions([ data := DEFAULT RECORD
+                               , urlvariables := DEFAULT RECORD
+                               ], options);
+
+    options := [ ...options
+               , add_slash_in_front := FALSE
+               , headers := [[ field := "Api-Token", value := this->apikey ]]
+               , jsontranslations := CELL["firstName","lastName"]
+               ];
+
+    RETURN WebwerfWebAPI::Request(method, endpoint, options);
+  }
+
+  PUBLIC UPDATE RECORD ARRAY FUNCTION CheckForErrors(VARIANT response, INTEGER httpstatuscode)
+  {
+    IF (CellExists(response, "errors"))
+      RETURN response.errors;
+    ELSE IF (CellExists(response, "message"))
+      RETURN [[ error := response.message ]];
+    ELSE IF (httpstatuscode != 200)
+      RETURN [[ error := `Invalid status code: ${httpstatuscode}` ]];
+
+    RETURN RECORD[];
+  }
+>;
