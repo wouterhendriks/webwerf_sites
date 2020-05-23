@@ -49,8 +49,8 @@ PUBLIC STATIC OBJECTTYPE WebwerfActiveCampaignAPI EXTEND WebwerfWebAPI
   /** Creates a new contact or updates an existing one if the contact already exists (based on email): https://developers.activecampaign.com/reference#create-contact-sync
 
       @param contactdata Record containing contact data, at least email
-      @return Result record, @see ReturnCallResult.
-      @cell(string) return.id New or updated id of contact
+      @return Result record.
+      @cell(string) return.id New or updated contact id
   */
   PUBLIC RECORD FUNCTION CreateOrUpdateContact(RECORD contactdata)
   {
@@ -80,12 +80,11 @@ PUBLIC STATIC OBJECTTYPE WebwerfActiveCampaignAPI EXTEND WebwerfWebAPI
   /** Delete a contact: https://developers.activecampaign.com/reference#delete-contact
 
       @param contactid Contact id
-      @return Result record, @see ReturnCallResult
+      @return Result record
   */
-  PUBLIC RECORD FUNCTION DeleteContact(INTEGER contactid)
+  PUBLIC RECORD FUNCTION DeleteContact(STRING contactid)
   {
-    RECORD callresult := this->Request("DELETE", `contacts/${contactid}`, CELL[ wrapresponse := TRUE ]);
-    RETURN callresult;//this->ReturnCallResult(callresult);
+    RETURN this->Request("DELETE", `contacts/${contactid}`, DEFAULT RECORD);
   }
 
   /** Do a lowlevel call straight to the api
@@ -118,7 +117,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfActiveCampaignAPI EXTEND WebwerfWebAPI
       RETURN response.errors;
     ELSE IF (CellExists(response, "message"))
       RETURN [[ error := response.message ]];
-    ELSE IF (httpstatuscode != 200)
+    ELSE IF (ToString(httpstatuscode) NOT LIKE "2??")
       RETURN [[ error := `Invalid status code: ${httpstatuscode}` ]];
 
     RETURN RECORD[];
