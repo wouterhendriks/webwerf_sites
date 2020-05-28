@@ -57,14 +57,14 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
     IF (method NOT IN allowed_methods)
       THROW NEW Exception("Invalid method. Options: " || AnyToString(allowed_methods,'tree'));
 
-    BLOB body := RecordExists(options.data) ? EncodeJSONBlob(options.data) : DEFAULT BLOB;
+    BLOB body := RecordExists(options.data) ? EncodeJSONBlob(options.data, options.jsontranslations) : DEFAULT BLOB;
 
     BOOLEAN requestsuccess := this->browser->SendRawRequest(method, url, options.headers, body);
 
     result.statustext := this->browser->GetHTTPStatusText();
     result.statuscode := this->browser->GetHTTPStatusCode();
 
-    VARIANT requestresult := DecodeJSONBlob(this->browser->content, options.jsontranslations);
+    VARIANT requestresult := DecodeJSONBlob(this->browser->content);
     IF (TypeId(requestresult) = TypeID(VARIANT ARRAY))
       requestresult := RECORD[];
 
@@ -139,8 +139,8 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
   {
     STRING msg := `${AnyToString(message,'htmltree')}<hr><br>${AnyToString(GetStackTrace(),'htmltree')}`;
     OBJECT mail := MakeEmailComposer();
-    mail->mailto := [ STRING(this->panicmail) ];
-    mail->subject := `WebAPI error for ${this->pvt_mode}`;
+    mail->mailto := [ email ];
+    mail->subject := `WebAPI error for ${this->restapiurl} (${this->pvt_mode})`;
     mail->SetRichBody(StringToBlob(msg), "text/html");
     mail->QueueMail();
   }

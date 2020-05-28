@@ -61,6 +61,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfActiveCampaignAPI EXTEND WebwerfWebAPI
                                    ]
                                  , contactdata
                                  , [ required := ["email"]
+                                   , passthrough := TRUE
                                    ]);
 
     IF (NOT IsValidEmailAddress(contactdata.email))
@@ -68,12 +69,11 @@ PUBLIC STATIC OBJECTTYPE WebwerfActiveCampaignAPI EXTEND WebwerfWebAPI
 
     RECORD jsonbody := [ contact := contactdata ];
 
-    RECORD callresult := this->Request("POST","contact/sync"
-                                  , CELL[ data := jsonbody
-                                        ]);
+    RECORD callresult := this->Request("POST","contact/sync", CELL[ data := jsonbody ]);
 
     RETURN [ ...callresult
            , id := CellExists(callresult.response, "contact") ? callresult.response.contact.id : ""
+           , is_new := callresult.statuscode = 201
            ];
   }
 
@@ -105,7 +105,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfActiveCampaignAPI EXTEND WebwerfWebAPI
     options := [ ...options
                , add_slash_in_front := FALSE
                , headers := [[ field := "Api-Token", value := this->apikey ]]
-               , jsontranslations := CELL["firstName","lastName"]
+               , jsontranslations := CELL["firstName","lastName","dealId","dealCustomFieldDatum","customFieldId","fieldValue"]
                ];
 
     RETURN WebwerfWebAPI::Request(method, endpoint, options);
