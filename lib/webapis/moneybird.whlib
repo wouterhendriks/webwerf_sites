@@ -2,6 +2,14 @@
 
 LOADLIB "mod::webwerf_sites/lib/internal/webapi.whlib";
 
+CONSTANT RECORD __contactstructure := [ company_name := ""
+                                      , chamber_of_commerce := ""
+                                      , id := ""
+                                      , customer_id := ""
+                                      , email := ""
+                                      , firstname := ""
+                                      , lastname := ""
+                                      ];
 
 PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI EXTEND WebwerfWebAPI
 <
@@ -26,7 +34,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI EXTEND WebwerfWebAPI
 
       @return All administrations the current user has access to
   */
-  PUBLIC RECORD ARRAY FUNCTION ListAdministrations()
+  PUBLIC RECORD ARRAY FUNCTION GetAdministrations()
   {
     RECORD request := this->Request("GET", "/administrations", [ add_administrationid_to_call := FALSE ]);
 
@@ -45,7 +53,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI EXTEND WebwerfWebAPI
 
       @return A list of contacts in the administration.
   */
-  PUBLIC RECORD ARRAY FUNCTION ListContacts(RECORD options DEFAULTSTO DEFAULT RECORD)
+  PUBLIC RECORD ARRAY FUNCTION GetContacts(RECORD options DEFAULTSTO DEFAULT RECORD)
   {
     // FIXME: add pagination (or at the very least an option to return from all pages)
 
@@ -59,21 +67,15 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI EXTEND WebwerfWebAPI
     IF (NOT request.success)
       RETURN RECORD[];
 
-    request.response := EnforceStructure([[ company_name := ""
-                                          , chamber_of_commerce := ""
-                                          , id := ""
-                                          , customer_id := ""
-                                          , email := ""
-                                          , firstname := ""
-                                          , lastname := ""
-                                          ]], request.response);
+    request.response := EnforceStructure([__contactstructure], request.response);
 
     RETURN request.response;
   }
 
   PUBLIC RECORD FUNCTION GetContact(STRING id)
   {
-    RETURN this->Request("GET", `/contacts/${id}`, DEFAULT RECORD);
+    RECORD req := this->Request("GET", `/contacts/${id}`, DEFAULT RECORD);
+    RETURN EnforceStructure(__contactstructure, req.response);
   }
 
   PUBLIC RECORD FUNCTION CreateSalesInvoice(RECORD data)
