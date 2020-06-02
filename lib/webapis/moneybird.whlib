@@ -1,6 +1,9 @@
 <?wh
 
+LOADLIB "wh::money.whlib";
+
 LOADLIB "mod::webwerf_sites/lib/internal/webapi.whlib";
+
 
 CONSTANT RECORD __contactstructure := [ company_name := ""
                                       , chamber_of_commerce := ""
@@ -13,7 +16,7 @@ CONSTANT RECORD __contactstructure := [ company_name := ""
 
 PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI EXTEND WebwerfWebAPI
 <
-  STRING administrationid;
+  PUBLIC STRING administrationid;
 
   /// enable/disable browser debug boolean
   PUBLIC PROPERTY debug(this->browser->debug, this->browser->debug);
@@ -80,17 +83,34 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI EXTEND WebwerfWebAPI
 
   PUBLIC RECORD FUNCTION CreateSalesInvoice(RECORD data)
   {
-    RECORD request := this->Request("POST", "sales_invoices",
-      [ data :=
-        [ sales_invoice := [ contact_id := "289267213416793829x"
-                           , details_attributes := [[ description := "Rocking Chair"
-                                                   , price := "129.95"
-                                                   ]]
-                           ]
-        ]
-      ]);
+    data := ValidateOptions([ contact_id := ""
+                            , details_attributes := [[ description := ""
+                                                     , price := 0.0
+                                                     , amount := ""
+                                                     ]
+                                                    ]
+                            ], data
+                            , [ required := ["contact_id"]
+                              ]);
 
-    RETURN request;
+    data.details_attributes :=
+        SELECT *
+             , price := FormatMoney(price, 2, ".", "", TRUE)
+          FROM data.details_attributes;
+
+    RETURN this->Request("POST", "sales_invoices", [ data := [ sales_invoice := data ] ]);
+  }
+
+  // https://developer.moneybird.com/api/sales_invoices/#patch_sales_invoices_id_send_invoice
+  PUBLIC RECORD FUNCTION SendSalesInvoice(RECORD data)
+  {
+    data := ValidateOptions([ invoice_id := ""
+                            , delivery_method := "Email" // Can be Email, Simplerinvoicing, Post or Manual.
+                            ], data
+                            , [ required := ["invoice_id"]
+                              ]);
+
+    RETURN this->Request("PATCH", `/sales_invoices/${data.invoice_id}/send_invoice`, [ data := [ sales_invoice_sending := data ] ]);
   }
 
   /** Do a lowlevel call straight to the api
@@ -126,12 +146,17 @@ PUBLIC STATIC OBJECTTYPE WebwerfMoneyBirdAPI EXTEND WebwerfWebAPI
     RETURN WebwerfWebAPI::Request(method, endpoint, options);
   }
 
+  PUBLIC STRING FUNCTION GetLinkToInvoice(STRING invoiceid)
+  {
+    RETURN `https://moneybird.com/${this->administrationid}/sales_invoices/${invoiceid}`;
+  }
+
   PUBLIC UPDATE RECORD ARRAY FUNCTION CheckForErrors(VARIANT response, INTEGER httpstatuscode)
   {
     RECORD ARRAY errors;
     IF (CellExists(response, "error"))
       INSERT [ error := response.error ] INTO errors AT END;
-    ELSE IF (httpstatuscode != 200)
+    ELSE IF (ToString(httpstatuscode) NOT LIKE "2??")
       INSERT [ error := `Invalid status code: ${httpstatuscode}` ] INTO errors AT END;
 
     RETURN errors;
