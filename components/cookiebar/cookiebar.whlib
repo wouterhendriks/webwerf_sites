@@ -7,13 +7,15 @@ PUBLIC MACRO PrepareWebwerfCookieBar(OBJECT webdesign)
 {
   RECORD cookiesettings := webdesign->targetsite->rootobject->GetInstanceData("http://sites.webwerf.nl/cookiebar");
 
-  IF (NOT CellExists(webdesign->jssiteconfig, "wwcookiename"))
+  IF (NOT CellExists(webdesign->jssiteconfig, "wwcookiename") AND cookiesettings.cookiename != "")
     INSERT CELL wwcookiename := GetSafeFileName(cookiesettings.cookiename) INTO webdesign->jssiteconfig;
 }
 
 PUBLIC MACRO RunWebwerfCookieBar(OBJECT webdesign)
 {
   RECORD cookiesettings := webdesign->targetsite->rootobject->GetInstanceData("http://sites.webwerf.nl/cookiebar");
+  IF (cookiesettings.cookiename IN ["","unknown"])
+    RETURN;
 
   RECORD wittydata :=
       CELL[ ...cookiesettings
