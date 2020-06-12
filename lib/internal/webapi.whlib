@@ -33,12 +33,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
     IF (this->pvt_mode = "")
       Abort("Cannot make a request until SetMode is called");
 
-    RECORD result := [ statustext := ""
-                     , statuscode := 0
-                     , success := FALSE
-                     , errors := RECORD[]
-                     // , response := DEFAULT VARIANT // RECORD or RECORD ARRAY
-                     ];
+    RECORD result := this->GetDefaultRequestResult();
 
     options := ValidateOptions([ data := DEFAULT RECORD
                                , urlvariables := DEFAULT RECORD
@@ -71,7 +66,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
     result.errors := this->CheckForErrors(requestresult, result.statuscode);
     result.success := Length(result.errors) = 0;
 
-    INSERT CELL response := requestresult INTO result;
+    result := [ ...result, response := requestresult ];
 
     IF (Length(result.errors) > 0 AND this->pvt_errormail != "")
       this->SendErrorMail(this->pvt_errormail, result, FALSE);
@@ -123,6 +118,16 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
 
     //IF(IsRPCTrafficLogged("system:webapi.mailchimp"))
     //  LogRPCForWebBrowser("system:webapi.mailchimp", "", this->browser);
+  }
+
+  PUBLIC RECORD FUNCTION GetDefaultRequestResult()
+  {
+    RETURN [ statustext := ""
+           , statuscode := 0
+           , success := FALSE
+           , errors := RECORD[]
+           , response := DEFAULT RECORD
+           ];
   }
 
   MACRO ThrowLastRequest()
