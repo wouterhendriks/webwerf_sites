@@ -13,7 +13,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
 <
   PUBLIC OBJECT browser;
 
-  /// sets the mode with optional settings, options for mode: oauth2
+  /// sets the mode with optional settings, options for mode: "oauth2", "rest"
   PUBLIC PROPERTY mode(pvt_mode, SetMode);
 
   /// if set, this email is used if a (relatively normal) error occurs
@@ -74,7 +74,7 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
     INSERT CELL response := requestresult INTO result;
 
     IF (Length(result.errors) > 0 AND this->pvt_errormail != "")
-      this->SendErrorMail(this->pvt_errormail, result);
+      this->SendErrorMail(this->pvt_errormail, result, FALSE);
 
     RETURN result;
   }
@@ -130,17 +130,17 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
     STRING err := `${this->oauth2->browser->href}: ${this->oauth2->browser->GetHTTPStatusText()}`;
 
     IF (this->pvt_panicmail != "")
-      this->SendErrorMail(this->pvt_panicmail, err);
+      this->SendErrorMail(this->pvt_panicmail, err, TRUE);
 
     THROW NEW Exception(err);
   }
 
-  MACRO SendErrorMail(STRING email, VARIANT message)
+  MACRO SendErrorMail(STRING email, VARIANT message, BOOLEAN panic)
   {
     STRING msg := `${AnyToString(message,'htmltree')}<hr><br>${AnyToString(GetStackTrace(),'htmltree')}`;
     OBJECT mail := MakeEmailComposer();
     mail->mailto := [ email ];
-    mail->subject := `WebAPI error for ${this->restapiurl} (${this->pvt_mode})`;
+    mail->subject := `${panic ? '[panic] ' : ''}WebAPI error for ${this->restapiurl} (${this->pvt_mode})`;
     mail->SetRichBody(StringToBlob(msg), "text/html");
     mail->QueueMail();
   }
