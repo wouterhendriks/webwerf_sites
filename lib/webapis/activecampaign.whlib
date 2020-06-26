@@ -71,6 +71,15 @@ PUBLIC STATIC OBJECTTYPE WebwerfActiveCampaignAPI EXTEND WebwerfWebAPI
 
     RECORD callresult := this->Request("POST","contact/sync", CELL[ data := jsonbody ]);
 
+    IF (NOT RecordExists(callresult.response))
+      this->ThrowLastRequest(`No response record from contact/sync call. Call result: ${AnyToString(callresult,'tree')}`);
+
+    IF (NOT CellExists(callresult.response, "contact"))
+      this->ThrowLastRequest(`No contact record in response from contact/sync call. Call result: ${AnyToString(callresult,'tree')}`);
+
+    IF (NOT CellExists(callresult.response.contact, "id") OR callresult.response.contact.id = "")
+      this->ThrowLastRequest(`No ID value in contact/sync call. Call result: ${AnyToString(callresult,'tree')}`);
+
     RETURN [ ...callresult
            , id := CellExists(callresult.response, "contact") ? callresult.response.contact.id : ""
            , is_new := callresult.statuscode = 201

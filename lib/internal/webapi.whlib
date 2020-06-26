@@ -130,9 +130,9 @@ PUBLIC STATIC OBJECTTYPE WebwerfWebAPI
            ];
   }
 
-  MACRO ThrowLastRequest()
+  PUBLIC MACRO ThrowLastRequest(STRING extramessage)
   {
-    STRING err := `${this->oauth2->browser->href}: ${this->oauth2->browser->GetHTTPStatusText()}`;
+    STRING err := `${extramessage = "" ? "" : `${extramessage}\n\n`}${this->browser->href}: ${this->browser->GetHTTPStatusText()}`;
 
     IF (this->pvt_panicmail != "")
       this->SendErrorMail(this->pvt_panicmail, err, TRUE);
